@@ -8,6 +8,7 @@ import {
   discover,
   serviceDetail,
   reportOutcome,
+  reportPattern,
   isPaymentRequired,
   isApiError,
 } from './api.js';
@@ -52,7 +53,7 @@ const TOOLS = [
   {
     name: 'nitrograph_report_outcome',
     description:
-      'Report the outcome of a call to a discovered service. This feeds the trust score and marks failing services dead. Call after every real invocation.',
+      'Report the outcome of a call to a discovered service. Always call this after an invocation, success or failure. On failure, include a diagnosis (one sentence describing what broke) and optionally a suggested_fix — after a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent. This is how the network compounds.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -61,8 +62,37 @@ const TOOLS = [
         endpoint: { type: 'string', description: 'Which endpoint path was hit.' },
         latency_ms: { type: 'number', description: 'End-to-end latency in milliseconds.' },
         error_code: { type: 'string', description: 'Error code on failure (HTTP status or provider code).' },
+        diagnosis: {
+          type: 'string',
+          description: 'On failure: one-sentence description of the actual root cause (e.g. "response was wrapped in { success, data } — read top-level fields as undefined"). Normalized and hashed server-side to group duplicate reports.',
+        },
+        suggested_fix: {
+          type: 'string',
+          description: 'On failure: one-sentence actionable fix (e.g. "unwrap json.data before reading fields"). Attached to the auto-promoted gotcha once evidence threshold is hit.',
+        },
       },
       required: ['slug', 'success'],
+    },
+  },
+  {
+    name: 'nitrograph_report_pattern',
+    description:
+      'Report a successful multi-step workflow against a service (e.g. a 3-step Apollo lead-build that worked end-to-end). After a few agents independently succeed with the same task + step shape, the workflow is auto-promoted to a proven_pattern visible to every future agent on service_detail. Only call for genuine successes — failures belong in nitrograph_report_outcome.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Primary service slug the pattern targets.' },
+        task: { type: 'string', description: 'One-line description of what the workflow accomplishes (e.g. "Build a list of N decision-makers at companies matching role + industry filters").' },
+        steps: {
+          type: 'array',
+          description: 'Ordered list of step objects. Each step should have { step: number, endpoint: string, params_template: object, note: string }.',
+          items: { type: 'object' },
+        },
+        success: { type: 'boolean', description: 'True if the whole workflow produced the intended outcome.' },
+        cost_usdc: { type: 'number', description: 'Total USDC cost across all steps.' },
+        latency_ms: { type: 'number', description: 'Total wall-clock latency in milliseconds.' },
+      },
+      required: ['slug', 'task', 'steps', 'success'],
     },
   },
 ] as const;
@@ -77,7 +107,7 @@ function jsonResult(obj: unknown) {
 
 export async function startServer(): Promise<void> {
   const server = new Server(
-    { name: 'nitrograph', version: '0.1.0' },
+    { name: 'nitrograph', version: '0.2.0' },
     { capabilities: { tools: {} } },
   );
 
@@ -97,6 +127,8 @@ export async function startServer(): Promise<void> {
       result = await serviceDetail(slug);
     } else if (name === 'nitrograph_report_outcome') {
       result = await reportOutcome(args as any);
+    } else if (name === 'nitrograph_report_pattern') {
+      result = await reportPattern(args as any);
     } else {
       return textResult(`Unknown tool: ${name}`);
     }

@@ -28,7 +28,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResu
       ...init,
       headers: {
         'content-type': 'application/json',
-        'user-agent': 'nitrograph-cli/0.1.0',
+        'user-agent': 'nitrograph-cli/0.2.0',
         ...(init.headers ?? {}),
       },
     });
@@ -101,12 +101,31 @@ export interface ReportOutcomeInput {
   endpoint?: string;
   latency_ms?: number;
   error_code?: string;
+  diagnosis?: string;
+  suggested_fix?: string;
 }
 
 export function reportOutcome(input: ReportOutcomeInput): Promise<ApiResult<Record<string, unknown>>> {
   const { slug, ...body } = input;
   return request<Record<string, unknown>>(
     `/v1/service/${encodeURIComponent(slug)}/report-outcome`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
+}
+
+export interface ReportPatternInput {
+  slug: string;
+  task: string;
+  steps: unknown[];
+  success: boolean;
+  cost_usdc?: number;
+  latency_ms?: number;
+}
+
+export function reportPattern(input: ReportPatternInput): Promise<ApiResult<Record<string, unknown>>> {
+  const { slug, ...body } = input;
+  return request<Record<string, unknown>>(
+    `/v1/service/${encodeURIComponent(slug)}/report-pattern`,
     { method: 'POST', body: JSON.stringify(body) },
   );
 }
