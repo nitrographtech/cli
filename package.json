@@ -1,0 +1,47 @@
+{
+  "name": "nitrograph",
+  "version": "0.1.0",
+  "description": "Nitrograph CLI — MCP server + install wizard for the Nitrograph service discovery network",
+  "type": "module",
+  "bin": {
+    "nitrograph": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "nitrograph",
+    "service-discovery",
+    "agent"
+  ],
+  "author": "Nitrograph",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nitrographtech/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nitrographtech/cli/issues"
+  },
+  "homepage": "https://nitrograph.com",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.4.0"
+  }
+}
