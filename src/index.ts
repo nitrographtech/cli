@@ -1,6 +1,19 @@
 #!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { startServer } from './server.js';
 import { runWizard } from './install.js';
+
+function pkgVersion(): string {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const pkg = JSON.parse(readFileSync(join(here, '..', 'package.json'), 'utf8'));
+    return pkg.version ?? '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -17,7 +30,7 @@ async function main(): Promise<void> {
   }
 
   if (cmd === '--version' || cmd === '-v') {
-    process.stdout.write('nitrograph 0.1.0\n');
+    process.stdout.write(`nitrograph ${pkgVersion()}\n`);
     return;
   }
 
@@ -25,7 +38,10 @@ async function main(): Promise<void> {
     process.stdout.write(`nitrograph — CLI for the Nitrograph service discovery network
 
 Usage:
-  npx nitrograph             Run the install wizard (detect MCP clients, write config)
+  npx nitrograph             Install the MCP server into detected clients.
+                             In a terminal → interactive wizard.
+                             In an agent / CI / pipe → auto-installs into
+                             every detected client with no prompts.
   npx nitrograph server      Run the MCP server (stdio transport)
   npx nitrograph --version   Print version
 
