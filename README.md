@@ -2,23 +2,38 @@
 
 CLI + MCP server for the [Nitrograph](https://nitrograph.com) service discovery network.
 
-Nitrograph indexes agent-usable APIs with trust scores, payment rails, and health checks. This package gives any MCP client (Claude Desktop, Cursor, Windsurf, Claude Code) three tools for finding and using those services.
+Nitrograph indexes agent-usable APIs with trust scores, payment rails, and health checks. This package gives any MCP client (Claude Desktop, Cursor, Windsurf, Claude Code, Hermes) four tools for finding and using those services.
 
 ## Install
+
+Two paths — pick whichever your client supports:
+
+### Hosted MCP (recommended — zero install)
+
+Register this URL as an MCP server in your client:
+
+```
+https://api.nitrograph.com/mcp
+```
+
+Transport: streamable HTTP, stateless. No npm, no subprocess, no API key. Works in any MCP client that supports remote HTTP servers.
+
+### Local CLI (stdio transport)
 
 ```bash
 npx nitrograph
 ```
 
-The wizard detects installed MCP clients and writes the server entry into each config file (creating a `.bak` of any existing file first). Restart the client to pick up the new tools.
+The wizard detects installed MCP clients and writes a stdio server entry into each config file (creating a `.bak` of any existing file first). Restart the client to pick up the new tools. Use this path if your client only supports stdio MCP.
 
 ## Tools
 
 | Tool | Purpose |
 |---|---|
-| `nitrograph_discover` | Search the registry by natural-language query, with filters for rail, cost, category. Returns ranked results. |
+| `nitrograph_discover` | Search the registry by natural-language query, with filters for rail, cost, category. Returns a ranked, pre-formatted list. |
 | `nitrograph_service_detail` | Fetch endpoints, OpenAPI spec, cost, base URL, and health for a service slug. |
-| `nitrograph_report_outcome` | Record success/failure of a call. Feeds the trust score; three connectivity failures mark a service dead. |
+| `nitrograph_report_outcome` | Record success/failure of a call. Feeds the trust score; failure diagnoses are auto-promoted to gotchas after a few agents agree. |
+| `nitrograph_report_pattern` | Record a successful multi-step workflow. Auto-promoted to a proven_pattern visible on service_detail after several independent successes. |
 
 ## Running the server directly
 
