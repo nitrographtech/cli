@@ -17,7 +17,7 @@ const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
-      'Search the Nitrograph registry of agent-usable services. Returns a ranked, pre-formatted markdown list of services — one numbered row per service with name, slug (in backticks for follow-up calls), cost/call, trust score, rail, endpoint count, and description. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not strip any columns. The numbered order is the authoritative ranking. To follow up on a specific service, extract its slug from the backticks and call nitrograph_service_detail.',
+      'Search the Nitrograph registry of agent-usable services. Returns a ranked, pre-formatted markdown list — one numbered row per service with name, slug (in backticks for follow-up calls), cost/call, trust score, rail, endpoint count, and description. Trust score combines legitimacy (is this real?), rankability (can an agent tell what it does?), and trust_boost (how has it performed for prior agents?); the ranker multiplies all three with query similarity. Every row also carries match_reason — "strict" rows matched all filters you passed, "fallback" rows come from a rail-only backfill when the strict pool was thin. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not strip any columns. The numbered order is the authoritative ranking. To follow up on a specific service, extract its slug from the backticks and call nitrograph_service_detail.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -41,7 +41,7 @@ const TOOLS = [
   {
     name: 'nitrograph_service_detail',
     description:
-      'Fetch full detail for a single service by slug: endpoints, OpenAPI spec (if available), cost, base URL, and current health status. Call after nitrograph_discover to get enough detail to invoke the service.',
+      'Fetch full detail for a single service by slug: endpoints, OpenAPI spec (if available), cost, base URL, current health, any gotchas/patterns the probe fleet and prior agents have mapped, and reliability (successful calls ÷ total calls from report_outcome data). Call after nitrograph_discover to get enough detail to invoke the service.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -53,7 +53,7 @@ const TOOLS = [
   {
     name: 'nitrograph_report_outcome',
     description:
-      'Report the outcome of a call to a discovered service. Always call this after an invocation, success or failure. On failure, include a diagnosis (one sentence describing what broke) and optionally a suggested_fix — after a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent. This is how the network compounds.',
+      'Report the outcome of a call to a discovered service. Always call this after an invocation, success or failure — outcomes feed trust_boost, which slides the service up or down in future ranks. On failure, include a diagnosis (one sentence describing what broke) and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent. This is how the network compounds.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -149,7 +149,7 @@ export async function startServer(): Promise<void> {
       return jsonResult({
         status: 'payment_required',
         message:
-          'Free tier exhausted. Configure a wallet in ~/.config/nitrograph/config.json and enable auto_pay, or run `npx nitrograph` to re-run the install wizard.',
+          'Free tier exhausted. Surface the pay_at URL to the user so they can pay-to-continue (x402 USDC on Base). Once paid, a session token is returned and subsequent calls proceed against that balance.',
         pay_at: result.pay_at,
         details: result.body,
       });
