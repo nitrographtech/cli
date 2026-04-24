@@ -1,10 +1,75 @@
 # nitrograph
 
-CLI + MCP server for the [Nitrograph](https://nitrograph.com) service discovery network.
+Agent harness + CLI + MCP server for the [Nitrograph](https://nitrograph.com) service discovery network.
 
-Nitrograph indexes agent-usable APIs with trust scores, payment rails, and health checks. This package gives any MCP client (Claude Desktop, Cursor, Windsurf, Claude Code, Hermes, etc.) four tools for finding, calling, and contributing feedback on those services.
+Nitrograph indexes agent-usable APIs with trust scores, payment rails, and health checks. This package gives you three ways to reach it:
 
-## Install
+- **Library (`import { Nitrograph } from 'nitrograph'`)** — typed harness for embedding discovery + outcome reporting directly in agent code.
+- **MCP tools** — four tools (`nitrograph_discover`, `nitrograph_service_detail`, `nitrograph_report_outcome`, `nitrograph_report_pattern`) for any MCP client (Claude Desktop, Cursor, Windsurf, Claude Code, Hermes, etc.).
+- **CLI** (`npx nitrograph`) — install wizard that wires the MCP server into every detected client.
+
+## Agent harness (library)
+
+```bash
+npm i nitrograph
+```
+
+```ts
+import { Nitrograph, NitrographPaymentRequiredError } from 'nitrograph';
+
+const ng = new Nitrograph();
+
+// Discover — ranked list
+const { results } = await ng.discover('lead generation', { limit: 10, rail: 'x402' });
+
+// Service detail — endpoints, OpenAPI, gotchas, reliability
+const detail = await ng.serviceDetail(results[0].slug);
+
+// Report outcome of a call — feeds the trust_boost loop
+await ng.reportOutcome({
+  slug: 'apollo',
+  success: true,
+  endpoint: '/v1/people/search',
+  latencyMs: 350,
+});
+
+// Report a successful multi-step workflow — auto-promoted to a proven_pattern
+await ng.reportPattern({
+  slug: 'apollo',
+  task: 'Find CROs at 50–200 employee SaaS companies',
+  steps: [{ step: 1, endpoint: '/v1/people/search', note: 'filter by title + size' }],
+  success: true,
+});
+```
+
+**Options:**
+
+```ts
+new Nitrograph({
+  apiUrl: 'https://api.nitrograph.com',            // default
+  sessionToken: process.env.NITROGRAPH_SESSION_TOKEN,// paid tier (from /v1/pay-to-continue)
+  timeoutMs: 15_000,
+  userAgent: 'my-agent/1.0',
+});
+```
+
+**Errors:**
+
+```ts
+try {
+  await ng.discover('…');
+} catch (err) {
+  if (err instanceof NitrographPaymentRequiredError) {
+    console.log('free tier exhausted · pay at', err.payAt);
+  }
+}
+```
+
+All errors extend `NitrographError`. Concrete classes: `NitrographApiError` (non-2xx), `NitrographPaymentRequiredError` (402/429), `NitrographNetworkError` (connection/timeout).
+
+This release (v0.5.0) ships the discovery primitives. Auto-pay for downstream service invocations lands in a follow-up.
+
+## MCP install
 
 Two paths — pick whichever your client supports.
 
