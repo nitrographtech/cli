@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { loadConfig, saveConfig, configPath } from './config.js';
+import { printBanner, section, tool, ok, info, c } from './banner.js';
 
 interface ClientTarget {
   id: string;
@@ -123,7 +124,7 @@ function installInto(picks: ClientTarget[]): ClientTarget[] {
     const json = readJson(t.configPath);
     const updated = t.insert(json, ENTRY);
     writeJson(t.configPath, updated);
-    stdout.write(`  ✓ Installed into ${t.label}\n`);
+    ok(`Installed into ${c.bold}${t.label}${c.reset}`);
   }
   return picks;
 }
@@ -132,38 +133,38 @@ function installInto(picks: ClientTarget[]): ClientTarget[] {
 // agents query immediately without waiting for their client to reload MCP
 // servers (MCP registration only takes effect on next client start).
 function printPostInstall(): void {
-  stdout.write('\n  Three tools will be available after your MCP client restarts:\n');
-  stdout.write('    • nitrograph_discover\n');
-  stdout.write('    • nitrograph_service_detail\n');
-  stdout.write('    • nitrograph_report_outcome\n');
-  stdout.write('\n  Query right now (HTTP, no restart needed):\n');
-  stdout.write('    curl -sX POST https://api.nitrograph.com/v1/discover \\\n');
-  stdout.write("      -H 'content-type: application/json' \\\n");
-  stdout.write('      -d \'{"query":"<what you need>"}\'\n\n');
+  section('Tools available after MCP client restart');
+  tool('nitrograph_discover', 'Search the registry of agent-usable services');
+  tool('nitrograph_service_detail', 'Full detail for a service (endpoints, schemas, health)');
+  tool('nitrograph_report_outcome', 'Report success/failure of an invocation');
+  tool('nitrograph_report_pattern', 'Report a working multi-step workflow');
+
+  section('Query right now (no restart needed)');
+  stdout.write(`    ${c.dim}curl -sX POST https://api.nitrograph.com/v1/discover \\${c.reset}\n`);
+  stdout.write(`      ${c.dim}-H 'content-type: application/json' \\${c.reset}\n`);
+  stdout.write(`      ${c.dim}-d '{"query":"<what you need>"}'${c.reset}\n\n`);
 }
 
 // Non-interactive install path — taken when stdin isn't a TTY (e.g. an agent
 // invoking `npx nitrograph` through its Bash tool) or when `--yes`/`--all`
 // was passed. Installs into every detected client with no prompting.
 function runHeadless(detected: ClientTarget[], allTargets: ClientTarget[]): void {
-  stdout.write('\n  Nitrograph (non-interactive install)\n');
-  stdout.write('  ====================================\n\n');
+  printBanner();
+  info('non-interactive install (no TTY detected)');
 
   if (detected.length === 0) {
-    // No detected clients — print the JSON snippet + candidate paths so the
-    // calling agent (or a human in a headless shell) can write it themselves.
-    stdout.write('  No MCP clients detected. Paste this server entry into your\n');
-    stdout.write('  MCP client config under "mcpServers":\n\n');
-    stdout.write(`    "${ENTRY_NAME}": ${JSON.stringify(ENTRY, null, 2).split('\n').join('\n    ')}\n\n`);
-    stdout.write('  Candidate config paths for known clients:\n');
-    allTargets.forEach((t) => stdout.write(`    • ${t.label}: ${t.configPath}\n`));
+    section('No MCP clients detected');
+    info('Paste this server entry into your MCP client config under "mcpServers":');
     stdout.write('\n');
+    stdout.write(`    ${c.cyan}"${ENTRY_NAME}"${c.reset}: ${JSON.stringify(ENTRY, null, 2).split('\n').join('\n    ')}\n\n`);
+    section('Candidate config paths');
+    allTargets.forEach((t) => stdout.write(`    ${c.dim}•${c.reset} ${c.bold}${t.label}${c.reset}: ${c.dim}${t.configPath}${c.reset}\n`));
     printPostInstall();
     return;
   }
 
-  stdout.write('  Detected clients:\n');
-  detected.forEach((t) => stdout.write(`    • ${t.label} (${t.configPath})\n`));
+  section('Detected clients');
+  detected.forEach((t) => stdout.write(`    ${c.green}•${c.reset} ${c.bold}${t.label}${c.reset} ${c.dim}${t.configPath}${c.reset}\n`));
   stdout.write('\n');
 
   installInto(detected);
@@ -183,20 +184,21 @@ export async function runWizard(): Promise<void> {
     return;
   }
 
-  stdout.write('\n  Nitrograph install wizard\n');
-  stdout.write('  =========================\n\n');
+  printBanner();
 
   const cfg = loadConfig();
 
   if (detected.length === 0) {
-    stdout.write('  No MCP clients detected (Claude Desktop, Cursor, Windsurf, Claude Code).\n');
-    stdout.write(`  Config directories checked:\n    ${targets.map((t) => t.configPath).join('\n    ')}\n\n`);
-    stdout.write('  Install an MCP client first, then re-run `npx nitrograph`.\n\n');
+    section('No MCP clients detected');
+    info('Checked: Claude Desktop, Cursor, Windsurf, Claude Code');
+    stdout.write('\n');
+    targets.forEach((t) => stdout.write(`    ${c.dim}• ${t.configPath}${c.reset}\n`));
+    stdout.write(`\n  Install an MCP client first, then re-run ${c.cyan}npx nitrograph${c.reset}.\n\n`);
     return;
   }
 
-  stdout.write('  Detected clients:\n');
-  detected.forEach((t, i) => stdout.write(`    ${i + 1}. ${t.label} (${t.configPath})\n`));
+  section('Detected clients');
+  detected.forEach((t, i) => stdout.write(`    ${c.yellow}${i + 1}.${c.reset} ${c.bold}${t.label}${c.reset} ${c.dim}${t.configPath}${c.reset}\n`));
   stdout.write('\n');
 
   const rl = createInterface({ input: stdin, output: stdout });
@@ -219,8 +221,8 @@ export async function runWizard(): Promise<void> {
 
     installInto(picks);
 
-    stdout.write('\n  Config written:\n');
-    stdout.write(`    ${configPath()}\n`);
+    section('Config written');
+    stdout.write(`    ${c.dim}${configPath()}${c.reset}\n`);
     saveConfig(cfg);
 
     printPostInstall();

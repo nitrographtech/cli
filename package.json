@@ -1,6 +1,6 @@
 {
   "name": "nitrograph",
-  "version": "0.3.2",
+  "version": "0.4.1",
   "description": "Nitrograph CLI — MCP server + install wizard for the Nitrograph service discovery network",
   "type": "module",
   "bin": {
