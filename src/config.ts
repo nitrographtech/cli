@@ -4,21 +4,10 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 
 export interface NitrographConfig {
   api_url: string;
-  wallet?: {
-    address?: string;
-    private_key?: string;
-    network?: 'base' | 'base-sepolia';
-  };
-  auto_pay?: {
-    enabled: boolean;
-    max_usdc_per_purchase?: number;
-    max_usdc_per_day?: number;
-  };
 }
 
 const DEFAULT_CONFIG: NitrographConfig = {
   api_url: 'https://api.nitrograph.com',
-  auto_pay: { enabled: false },
 };
 
 export function configDir(): string {
