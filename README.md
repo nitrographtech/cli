@@ -1,121 +1,141 @@
-# nitrograph
+# Nitrograph
 
-Agent harness + CLI + MCP server for the [Nitrograph](https://nitrograph.com) service discovery network.
+[![npm version](https://img.shields.io/npm/v/nitrograph.svg)](https://www.npmjs.com/package/nitrograph)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-111827)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
-Nitrograph indexes agent-usable APIs with trust scores, payment rails, and health checks. This package gives you three ways to reach it:
+Find the right API for an agent. Inspect how to call it. Report whether it worked.
 
-- **Library (`import { Nitrograph } from 'nitrograph'`)** — typed harness for embedding discovery + outcome reporting directly in agent code.
-- **MCP tools** — four tools (`nitrograph_discover`, `nitrograph_service_detail`, `nitrograph_report_outcome`, `nitrograph_report_pattern`) for any MCP client (Claude Desktop, Cursor, Windsurf, Claude Code, Hermes, etc.).
-- **CLI** (`npx nitrograph`) — install wizard that wires the MCP server into every detected client.
-
-## Agent harness (library)
+Nitrograph is a service discovery network for agent-usable APIs, including x402 and MPP services. It ranks services by task relevance, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.
 
 ```bash
 npm i nitrograph
 ```
 
-```ts
-import { Nitrograph, NitrographPaymentRequiredError } from 'nitrograph';
+## Quick Start
 
-const ng = new Nitrograph();
+### Option 1: With an AI agent
 
-// Discover — ranked list
-const { results } = await ng.discover('lead generation', { limit: 10, rail: 'x402' });
+Install the Nitrograph skill, then ask your agent to find a service:
 
-// Service detail — endpoints, OpenAPI, gotchas, reliability
-const detail = await ng.serviceDetail(results[0].slug);
-
-// Report outcome of a call — feeds the trust_boost loop
-await ng.reportOutcome({
-  slug: 'apollo',
-  success: true,
-  endpoint: '/v1/people/search',
-  latencyMs: 350,
-});
-
-// Report a successful multi-step workflow — auto-promoted to a proven_pattern
-await ng.reportPattern({
-  slug: 'apollo',
-  task: 'Find CROs at 50–200 employee SaaS companies',
-  steps: [{ step: 1, endpoint: '/v1/people/search', note: 'filter by title + size' }],
-  success: true,
-});
+```bash
+npx skills add nitrographtech/cli
 ```
 
-**Options:**
+Example prompts:
 
-```ts
-new Nitrograph({
-  apiUrl: 'https://api.nitrograph.com',            // default
-  sessionToken: process.env.NITROGRAPH_SESSION_TOKEN,// paid tier (from /v1/pay-to-continue)
-  timeoutMs: 15_000,
-  userAgent: 'my-agent/1.0',
-});
-```
+> Using the Nitrograph skill, find a lead generation API, inspect the best result, and tell me how to call it.
 
-**Errors:**
+> Use Nitrograph to find an image generation service. Show recommended results separately from related lower-confidence matches.
 
-```ts
-try {
-  await ng.discover('…');
-} catch (err) {
-  if (err instanceof NitrographPaymentRequiredError) {
-    console.log('free tier exhausted · pay at', err.payAt);
-  }
-}
-```
+> Find a data enrichment service, call service detail for the top result, and report the outcome after invocation.
 
-All errors extend `NitrographError`. Concrete classes: `NitrographApiError` (non-2xx), `NitrographPaymentRequiredError` (402/429), `NitrographNetworkError` (connection/timeout).
+The skill teaches agents the Nitrograph workflow: discover first, treat `results` as high-confidence recommendations, treat `related_results` as semantic fallbacks, call service detail before invocation, and report outcomes afterward.
 
-This release (v0.5.0) ships the discovery primitives. Auto-pay for downstream service invocations lands in a follow-up.
+### Option 2: Hosted MCP
 
-## MCP install
+Register Nitrograph as a remote MCP server:
 
-Two paths — pick whichever your client supports.
-
-### Hosted MCP (recommended — zero install)
-
-Register this URL as an MCP server in your client:
-
-```
+```text
 https://api.nitrograph.com/mcp
 ```
 
-Transport: streamable HTTP, stateless. No npm, no subprocess, no API key. Works in any MCP client that supports remote HTTP servers.
+No npm install, subprocess, or API key required. Use this when your MCP client supports remote HTTP servers.
 
-### Local CLI (stdio transport)
+### Option 3: Local MCP
 
 ```bash
 npx nitrograph
 ```
 
-The wizard detects installed MCP clients and writes a stdio server entry into each config file (creating a `.bak` of any existing file first). Restart the client to pick up the new tools. Use this path if your client only supports stdio MCP.
+The wizard detects installed MCP clients and writes a stdio server entry into each config file, creating `.bak` backups first. If stdin is not a TTY, it runs hands-off and installs into every detected client.
 
-**Agent-friendly:** if `stdin` is not a TTY (running inside an agent's Bash tool, a pipe, or CI), the wizard skips all prompts and auto-installs into every detected client. Fully hands-off.
+### Option 4: TypeScript Harness
 
-## Tools
+```ts
+import { Nitrograph } from 'nitrograph';
+
+const ng = new Nitrograph();
+
+const { results, related_results } = await ng.discover('lead generation', {
+  limit: 10,
+});
+
+const best = results[0];
+const detail = await ng.serviceDetail(best.slug);
+
+await ng.reportOutcome({
+  slug: best.slug,
+  success: true,
+  endpoint: '/v1/people/search',
+  latencyMs: 350,
+});
+```
+
+## Why Nitrograph?
+
+- Agent-first discovery: natural-language service search, not keyword docs browsing.
+- High-confidence ranking: primary `results` are separated from lower-confidence `related_results`.
+- Call readiness: service detail returns endpoints, schemas, health, costs, gotchas, and proven patterns.
+- Feedback loop: agents report success/failure, and future rankings learn from outcomes.
+- Multi-surface: one network exposed through hosted MCP, local MCP, TypeScript, and raw HTTP.
+
+## MCP Tools
 
 | Tool | Purpose |
 |---|---|
-| `nitrograph_discover` | Search the registry by natural-language query, with filters for rail, cost, category. Returns a ranked, pre-formatted list. |
-| `nitrograph_service_detail` | Fetch endpoints, OpenAPI spec, cost, base URL, and health for a service slug. |
-| `nitrograph_report_outcome` | Record success/failure of a call. Feeds the trust score; repeated failure diagnoses are auto-promoted to gotchas visible on service detail. |
-| `nitrograph_report_pattern` | Record a working multi-step workflow. After several independent successes with the same shape it's auto-promoted to a `proven_pattern`. |
+| `nitrograph_discover` | Search by natural-language task. Returns recommended `results` and lower-confidence `related_results`. |
+| `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven patterns for a service. |
+| `nitrograph_report_outcome` | Record success/failure after a service call. Feeds trust and gotcha promotion. |
+| `nitrograph_report_pattern` | Record a successful reusable multi-step workflow. |
 
-## Running the server directly
+## Harness API
 
-```bash
-npx nitrograph server
+```ts
+new Nitrograph({
+  apiUrl: 'https://api.nitrograph.com',
+  sessionToken: process.env.NITROGRAPH_SESSION_TOKEN,
+  timeoutMs: 15_000,
+  userAgent: 'my-agent/1.0',
+});
 ```
 
-Uses stdio transport. For use behind an MCP client, not for direct invocation.
+Errors extend `NitrographError`:
 
-## Try it without installing
+- `NitrographApiError`: non-2xx response.
+- `NitrographPaymentRequiredError`: free tier exhausted; includes `payAt`.
+- `NitrographNetworkError`: timeout or connection failure.
+
+## Raw HTTP
 
 ```bash
 curl -sX POST https://api.nitrograph.com/v1/discover \
   -H 'content-type: application/json' \
-  -d '{"query":"text-to-speech with SSML support"}'
+  -d '{"query":"lead generation","limit":10}'
+```
+
+```bash
+curl -s https://api.nitrograph.com/v1/service/apollo
+```
+
+## Skills
+
+Nitrograph ships an agent skill at:
+
+```text
+skills/nitrograph/SKILL.md
+```
+
+Install from GitHub:
+
+```bash
+npx skills add nitrographtech/cli
+```
+
+For Codex plugin-style installs, sparse-install the skill surface:
+
+```bash
+codex plugin marketplace add nitrographtech/cli --sparse skills
 ```
 
 ## Config
@@ -128,12 +148,14 @@ curl -sX POST https://api.nitrograph.com/v1/discover \
 }
 ```
 
-Only `api_url` is read today. The free tier (50 queries/hour/IP) requires no config. When free tier is exhausted, the CLI surfaces a pay-to-continue URL — pay with x402 USDC on Base and the returned session token carries the balance automatically.
+The free tier requires no config. When the free tier is exhausted, Nitrograph returns a pay-to-continue URL; the returned session token can be passed as `NITROGRAPH_SESSION_TOKEN`.
 
 ## Links
 
+- Website: <https://nitrograph.com>
 - Docs: <https://nitrograph.com/docs>
-- Source: <https://github.com/nitrographtech/cli>
+- Agent docs: <https://nitrograph.com/llms-full.txt>
+- npm: <https://www.npmjs.com/package/nitrograph>
 - Issues: <https://github.com/nitrographtech/cli/issues>
 
 ## License

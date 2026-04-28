@@ -17,7 +17,7 @@ const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
-      'Search the Nitrograph registry of agent-usable services. Returns a ranked, pre-formatted markdown list — one numbered row per service with name, slug (in backticks for follow-up calls), cost/call, trust score, rail, endpoint count, and description. Trust score combines legitimacy (is this real?), rankability (can an agent tell what it does?), and trust_boost (how has it performed for prior agents?); the ranker multiplies all three with query similarity. Every row also carries match_reason — "strict" rows matched all filters you passed, "fallback" rows come from a rail-only backfill when the strict pool was thin. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not strip any columns. The numbered order is the authoritative ranking. To follow up on a specific service, extract its slug from the backticks and call nitrograph_service_detail.',
+      'Search the Nitrograph registry of agent-usable services. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The pre-formatted markdown display is authoritative: recommended results are primary, related_results are not recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not promote related_results into primary recommendations. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -134,7 +134,7 @@ function displayResult(obj: any) {
 
 export async function startServer(): Promise<void> {
   const server = new Server(
-    { name: 'nitrograph', version: '0.2.0' },
+    { name: 'nitrograph', version: '0.5.1' },
     { capabilities: { tools: {} } },
   );
 

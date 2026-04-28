@@ -1,7 +1,7 @@
 {
   "name": "nitrograph",
-  "version": "0.5.0",
-  "description": "Nitrograph agent harness + MCP server + install wizard for the Nitrograph service discovery network",
+  "version": "0.5.1",
+  "description": "Agent-first service discovery via Nitrograph MCP, TypeScript harness, and skills",
   "type": "module",
   "bin": {
     "nitrograph": "dist/index.js"
@@ -16,6 +16,7 @@
   },
   "files": [
     "dist",
+    "skills",
     "README.md",
     "LICENSE"
   ],
@@ -29,7 +30,9 @@
     "model-context-protocol",
     "nitrograph",
     "service-discovery",
-    "agent"
+    "agent",
+    "x402",
+    "skills"
   ],
   "author": "Nitrograph",
   "license": "MIT",

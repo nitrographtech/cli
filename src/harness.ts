@@ -31,6 +31,7 @@ export interface DiscoverInput {
 
 export interface DiscoveredService {
   slug: string;
+  display_slug?: string;
   name: string;
   description?: string | null;
   rail?: string | null;
@@ -41,6 +42,7 @@ export interface DiscoveredService {
   rankability_score?: number | null;
   trust_boost?: number | null;
   match_reason?: 'strict' | 'fallback' | string;
+  match_strength?: 'strong' | 'related' | string;
   endpoint_count?: number | null;
   [key: string]: unknown;
 }
@@ -48,7 +50,11 @@ export interface DiscoveredService {
 export interface DiscoverResponse {
   query: string;
   results: DiscoveredService[];
+  related_results?: DiscoveredService[];
   total_results: number;
+  recommended_count?: number;
+  related_count?: number;
+  weak_matches_available?: boolean;
   display?: string;
   [key: string]: unknown;
 }
