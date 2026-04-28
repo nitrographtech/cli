@@ -17,6 +17,8 @@
   "files": [
     "dist",
     "skills",
+    "assets",
+    ".codex-plugin",
     "README.md",
     "LICENSE"
   ],

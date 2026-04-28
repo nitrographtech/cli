@@ -1,0 +1,11 @@
+{
+  "name": "nitrograph",
+  "version": "0.5.1",
+  "description": "Find, inspect, and evaluate agent-usable APIs with Nitrograph.",
+  "skills": [
+    {
+      "name": "nitrograph",
+      "path": "../skills/nitrograph"
+    }
+  ]
+}

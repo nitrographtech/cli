@@ -4,6 +4,10 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-111827)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
+<p align="center">
+  <img src="assets/nitrograph-hero.svg" alt="Nitrograph service discovery network" width="100%">
+</p>
+
 Find the right API for an agent. Inspect how to call it. Report whether it worked.
 
 Nitrograph is a service discovery network for agent-usable APIs, including x402 and MPP services. It ranks services by task relevance, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.

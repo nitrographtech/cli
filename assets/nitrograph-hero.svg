@@ -1,0 +1,94 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nitrograph service discovery network hero">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="0" x2="1200" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#061014"/>
+      <stop offset="0.52" stop-color="#10251D"/>
+      <stop offset="1" stop-color="#F2B84B"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="90" y1="84" x2="1130" y2="562" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071216" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#13251E" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#EAF7C7"/>
+      <stop offset="1" stop-color="#F5A524"/>
+    </linearGradient>
+    <filter id="shadow" x="40" y="50" width="1200" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <circle cx="1082" cy="94" r="220" fill="#F5A524" fill-opacity="0.22"/>
+  <circle cx="176" cy="552" r="260" fill="#7DAA55" fill-opacity="0.18"/>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="74" width="1120" height="492" rx="28" fill="url(#panel)" stroke="#F2D38A" stroke-opacity="0.24"/>
+  </g>
+
+  <g transform="translate(122 116)">
+    <rect width="1036" height="408" rx="22" fill="#071216" stroke="#D9C173" stroke-opacity="0.18"/>
+
+    <g transform="translate(28 26)">
+      <circle cx="10" cy="10" r="7" fill="#EC6A5E"/>
+      <circle cx="34" cy="10" r="7" fill="#F4BF4F"/>
+      <circle cx="58" cy="10" r="7" fill="#61C554"/>
+      <text x="910" y="16" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">api.nitrograph.com</text>
+    </g>
+
+    <g transform="translate(42 78)">
+      <text fill="#EAF7C7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
+        <tspan x="0" y="0">$ nitrograph discover "lead generation"</tspan>
+      </text>
+
+      <g transform="translate(0 38)">
+        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
+        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">1. Hunter</text>
+        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">email finding + company enrichment</text>
+        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
+      </g>
+
+      <g transform="translate(0 96)">
+        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
+        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">2. Clado</text>
+        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">people search + LinkedIn enrichment</text>
+        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
+      </g>
+
+      <g transform="translate(0 154)">
+        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
+        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">3. Apollo</text>
+        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">lead search + sales intelligence</text>
+        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
+      </g>
+
+      <g transform="translate(0 230)">
+        <text x="0" y="0" fill="#8CA99A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">related_results moved below the fold: lead time, lead exposure, trivia, image generation</text>
+      </g>
+    </g>
+
+    <g transform="translate(704 88)">
+      <rect width="286" height="250" rx="20" fill="#10251D" stroke="#F2D38A" stroke-opacity="0.28"/>
+      <text x="28" y="48" fill="#F8F1D6" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="700">Agent API graph</text>
+      <text x="28" y="84" fill="#B7C7BC" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14">Discover. Inspect. Invoke. Report.</text>
+
+      <g transform="translate(42 126)">
+        <circle cx="26" cy="26" r="22" fill="#EAF7C7"/>
+        <circle cx="116" cy="26" r="22" fill="#F2B84B"/>
+        <circle cx="72" cy="104" r="22" fill="#9FC46E"/>
+        <path d="M48 28H94M105 45L83 86M60 86L39 45" stroke="#EAF7C7" stroke-opacity="0.58" stroke-width="4" stroke-linecap="round"/>
+        <text x="8" y="72" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">MCP</text>
+        <text x="92" y="72" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">API</text>
+        <text x="38" y="150" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">SKILL</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(92 592)">
+    <text fill="#071216" fill-opacity="0.72" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">MCP • TypeScript harness • raw HTTP • agent skill • x402/MPP services</text>
+  </g>
+</svg>
