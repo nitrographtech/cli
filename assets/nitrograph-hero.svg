@@ -1,94 +1,132 @@
-<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nitrograph service discovery network hero">
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nitrograph service discovery for agents">
   <defs>
-    <linearGradient id="bg" x1="80" y1="0" x2="1200" y2="640" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#061014"/>
-      <stop offset="0.52" stop-color="#10251D"/>
-      <stop offset="1" stop-color="#F2B84B"/>
-    </linearGradient>
-    <linearGradient id="panel" x1="90" y1="84" x2="1130" y2="562" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#071216" stop-opacity="0.96"/>
-      <stop offset="1" stop-color="#13251E" stop-opacity="0.9"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#EAF7C7"/>
-      <stop offset="1" stop-color="#F5A524"/>
-    </linearGradient>
-    <filter id="shadow" x="40" y="50" width="1200" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.34"/>
+    <style>
+      .sans { font-family: "Inter Tight", "Aptos", "Helvetica Neue", Arial, sans-serif; }
+      .mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace; }
+      .upper { letter-spacing: 1.6px; text-transform: uppercase; }
+    </style>
+    <filter id="heroShadow" x="0" y="0" width="1280" height="640" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="34" flood-color="#000000" flood-opacity="0.16"/>
+    </filter>
+    <filter id="terminalShadow" x="650" y="70" width="560" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.38"/>
     </filter>
     <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="1"/>
+      <path d="M 40 0 L 0 0 0 40" stroke="#E5E4DE" stroke-width="1"/>
     </pattern>
+    <linearGradient id="accentFade" x1="813" y1="90" x2="1194" y2="523" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C4EA38" stop-opacity="0.32"/>
+      <stop offset="0.56" stop-color="#C4EA38" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#C4EA38" stop-opacity="0"/>
+    </linearGradient>
   </defs>
 
-  <rect width="1280" height="640" fill="url(#bg)"/>
-  <rect width="1280" height="640" fill="url(#grid)"/>
-  <circle cx="1082" cy="94" r="220" fill="#F5A524" fill-opacity="0.22"/>
-  <circle cx="176" cy="552" r="260" fill="#7DAA55" fill-opacity="0.18"/>
+  <rect width="1280" height="640" fill="#0E0E10"/>
 
-  <g filter="url(#shadow)">
-    <rect x="80" y="74" width="1120" height="492" rx="28" fill="url(#panel)" stroke="#F2D38A" stroke-opacity="0.24"/>
+  <g filter="url(#heroShadow)">
+    <rect x="0.5" y="0.5" width="1279" height="639" fill="#FAFAF7" stroke="#222222"/>
   </g>
 
-  <g transform="translate(122 116)">
-    <rect width="1036" height="408" rx="22" fill="#071216" stroke="#D9C173" stroke-opacity="0.18"/>
+  <rect width="1280" height="640" fill="url(#grid)" opacity="0.55"/>
+  <circle cx="1104" cy="176" r="260" fill="url(#accentFade)"/>
+  <circle cx="158" cy="566" r="170" fill="#C4EA38" opacity="0.08"/>
 
-    <g transform="translate(28 26)">
-      <circle cx="10" cy="10" r="7" fill="#EC6A5E"/>
-      <circle cx="34" cy="10" r="7" fill="#F4BF4F"/>
-      <circle cx="58" cy="10" r="7" fill="#61C554"/>
-      <text x="910" y="16" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">api.nitrograph.com</text>
+  <g class="mono upper" font-size="12" fill="#666666">
+    <rect x="0" y="0" width="1280" height="57" fill="#FAFAF7" opacity="0.9"/>
+    <line x1="0" y1="57" x2="1280" y2="57" stroke="#E5E4DE"/>
+    <text x="32" y="35" fill="#0A0A0A" font-weight="700">NITROGRAPH</text>
+    <text x="149" y="35">/ open source</text>
+    <text x="933" y="35">V 0.5.1</text>
+    <text x="1004" y="35">.</text>
+    <text x="1025" y="35">MIT</text>
+    <text x="1078" y="35">.</text>
+    <circle cx="1112" cy="31" r="4" fill="#A8D428"/>
+    <circle cx="1112" cy="31" r="8" fill="#C4EA38" opacity="0.2"/>
+    <text x="1130" y="35" fill="#2A8A3E">API LIVE</text>
+  </g>
+
+  <g transform="translate(56 86)">
+    <g class="mono upper" font-size="12">
+      <rect x="0" y="-6" width="6" height="6" fill="#A8D428"/>
+      <text x="18" y="0" fill="#666666">for the devs and agents shipping commerce</text>
     </g>
 
-    <g transform="translate(42 78)">
-      <text fill="#EAF7C7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
-        <tspan x="0" y="0">$ nitrograph discover "lead generation"</tspan>
-      </text>
-
-      <g transform="translate(0 38)">
-        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
-        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">1. Hunter</text>
-        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">email finding + company enrichment</text>
-        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
-      </g>
-
-      <g transform="translate(0 96)">
-        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
-        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">2. Clado</text>
-        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">people search + LinkedIn enrichment</text>
-        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
-      </g>
-
-      <g transform="translate(0 154)">
-        <rect width="602" height="48" rx="12" fill="#10251D" stroke="#9FC46E" stroke-opacity="0.45"/>
-        <text x="18" y="30" fill="#F8F1D6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">3. Apollo</text>
-        <text x="164" y="30" fill="#9FC46E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">lead search + sales intelligence</text>
-        <text x="520" y="30" fill="#F2B84B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">strong</text>
-      </g>
-
-      <g transform="translate(0 230)">
-        <text x="0" y="0" fill="#8CA99A" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">related_results moved below the fold: lead time, lead exposure, trivia, image generation</text>
-      </g>
+    <g class="sans" font-size="50" font-weight="700" letter-spacing="-1.5" fill="#0A0A0A">
+      <text x="0" y="64">Tell your agent what you need.</text>
+      <rect x="0" y="80" width="355" height="54" fill="#C4EA38"/>
+      <text x="6" y="122">Pick who does it.</text>
+      <text x="0" y="180">Get the result.</text>
     </g>
 
-    <g transform="translate(704 88)">
-      <rect width="286" height="250" rx="20" fill="#10251D" stroke="#F2D38A" stroke-opacity="0.28"/>
-      <text x="28" y="48" fill="#F8F1D6" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="700">Agent API graph</text>
-      <text x="28" y="84" fill="#B7C7BC" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14">Discover. Inspect. Invoke. Report.</text>
+    <g class="mono" font-size="14" fill="#1A1A1A">
+      <text x="0" y="226">Your agent searches 18,000 services, shows you</text>
+      <text x="0" y="249">options with real pricing, and delivers the result.</text>
+      <text x="0" y="272">You pick where your money goes.</text>
+    </g>
 
-      <g transform="translate(42 126)">
-        <circle cx="26" cy="26" r="22" fill="#EAF7C7"/>
-        <circle cx="116" cy="26" r="22" fill="#F2B84B"/>
-        <circle cx="72" cy="104" r="22" fill="#9FC46E"/>
-        <path d="M48 28H94M105 45L83 86M60 86L39 45" stroke="#EAF7C7" stroke-opacity="0.58" stroke-width="4" stroke-linecap="round"/>
-        <text x="8" y="72" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">MCP</text>
-        <text x="92" y="72" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">API</text>
-        <text x="38" y="150" fill="#B7C7BC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">SKILL</text>
-      </g>
+    <g class="mono upper" font-size="11" fill="#1A1A1A">
+      <rect x="0" y="303" width="148" height="33" fill="#C4EA38" stroke="#A8D428"/>
+      <text x="14" y="324" fill="#0A0A0A" font-weight="700">$</text>
+      <text x="30" y="324">npx nitrograph</text>
+
+      <rect x="156" y="303" width="122" height="33" fill="#FFFFFF" stroke="#C9C8C0"/>
+      <text x="170" y="324" fill="#0A0A0A" font-weight="700">18K+</text>
+      <text x="209" y="324">services</text>
+
+      <rect x="286" y="303" width="116" height="33" fill="#FFFFFF" stroke="#C9C8C0"/>
+      <text x="300" y="324" fill="#0A0A0A" font-weight="700">x402</text>
+      <text x="337" y="324">+</text>
+      <text x="352" y="324" fill="#0A0A0A" font-weight="700">MPP</text>
     </g>
   </g>
 
-  <g transform="translate(92 592)">
-    <text fill="#071216" fill-opacity="0.72" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">MCP • TypeScript harness • raw HTTP • agent skill • x402/MPP services</text>
+  <g filter="url(#terminalShadow)" transform="translate(684 92)">
+    <rect width="540" height="340" fill="#0E0E10" stroke="#1A1A1D"/>
+    <rect width="540" height="42" fill="#141417"/>
+    <line x1="0" y1="42" x2="540" y2="42" stroke="#1A1A1D"/>
+    <circle cx="24" cy="21" r="5" fill="#3A3A3D"/>
+    <circle cx="42" cy="21" r="5" fill="#3A3A3D"/>
+    <circle cx="60" cy="21" r="5" fill="#3A3A3D"/>
+    <text class="mono upper" x="397" y="25" fill="#7A7A78" font-size="11">~/agent . zsh</text>
+
+    <g class="mono" font-size="13">
+      <text x="18" y="73" fill="#7A7A78">o Nitrograph query:</text>
+      <text x="171" y="73" fill="#C4EA38">lead generation</text>
+
+      <text x="18" y="120" fill="#FFFFFF" font-weight="700">High-confidence results</text>
+
+      <text x="18" y="154" fill="#7A7A78">1.</text>
+      <text x="42" y="154" fill="#FFFFFF" font-weight="700">Hunter</text>
+      <text x="97" y="154" fill="#7A7A78">-</text>
+      <text x="113" y="154" fill="#A8D428">hunter</text>
+      <text x="169" y="154" fill="#7A7A78">-</text>
+      <text x="185" y="154" fill="#DCDCD2">$0.0116/call</text>
+      <text x="36" y="177" fill="#7A7A78">Email finding, verification, and company enrichment for outreach.</text>
+
+      <text x="18" y="215" fill="#7A7A78">2.</text>
+      <text x="42" y="215" fill="#FFFFFF" font-weight="700">Clado</text>
+      <text x="91" y="215" fill="#7A7A78">-</text>
+      <text x="107" y="215" fill="#A8D428">clado</text>
+      <text x="157" y="215" fill="#7A7A78">-</text>
+      <text x="173" y="215" fill="#DCDCD2">$0.0097/call</text>
+      <text x="36" y="238" fill="#7A7A78">People search, LinkedIn enrichment, deep research.</text>
+
+      <text x="18" y="276" fill="#7A7A78">3.</text>
+      <text x="42" y="276" fill="#FFFFFF" font-weight="700">Apollo</text>
+      <text x="99" y="276" fill="#7A7A78">-</text>
+      <text x="115" y="276" fill="#A8D428">apollo</text>
+      <text x="173" y="276" fill="#7A7A78">-</text>
+      <text x="189" y="276" fill="#DCDCD2">$0.0056/call</text>
+      <text x="36" y="299" fill="#7A7A78">Sales intelligence with 275M+ contacts.</text>
+    </g>
+  </g>
+
+  <g class="mono upper" font-size="11" fill="#666666">
+    <rect x="0" y="582" width="1280" height="58" fill="#FAFAF7" opacity="0.9"/>
+    <line x1="0" y1="582" x2="1280" y2="582" stroke="#E5E4DE"/>
+    <circle cx="36" cy="611" r="4" fill="#A8D428"/>
+    <circle cx="36" cy="611" r="8" fill="#C4EA38" opacity="0.2"/>
+    <text x="54" y="615">github.com / nitrograph</text>
+    <text x="873" y="615">nitrograph.com . headless . agent-native</text>
   </g>
 </svg>
