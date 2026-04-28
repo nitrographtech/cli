@@ -17,7 +17,7 @@ const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
-      'Search the Nitrograph registry of agent-usable services. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The pre-formatted markdown display is authoritative: recommended results are primary, related_results are not recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not promote related_results into primary recommendations. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
+      'Search the Nitrograph registry of agent-usable services. IMPORTANT: omit filters unless the user explicitly requested a rail, category, or price ceiling. Do not send filters: {}. Do not send rail: "" or category: "". Do not send max_cost: 0 for "no cost filter"; max_cost: 0 means free-only and will be rejected. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The pre-formatted markdown display is authoritative: recommended results are primary, related_results are not recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not promote related_results into primary recommendations. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -28,10 +28,12 @@ const TOOLS = [
         limit: { type: 'number', description: 'Max results (1–50). Default 10.' },
         filters: {
           type: 'object',
+          description: 'Optional. Omit entirely unless the user explicitly requested filtering. Empty/default filters change ranking behavior and must not be sent.',
+          additionalProperties: false,
           properties: {
-            rail: { type: 'string', description: 'Payment rail: x402, mpp, stripe, none.' },
-            max_cost: { type: 'number', description: 'Max cost per call in USD.' },
-            category: { type: 'string', description: 'Service category filter.' },
+            rail: { type: 'string', description: 'Payment rail: x402, mpp, stripe, none. Omit when not explicitly requested; never send an empty string.' },
+            max_cost: { type: 'number', exclusiveMinimum: 0, description: 'Max cost per call in USD. Must be greater than 0. Omit for no price filter; do not send 0.' },
+            category: { type: 'string', description: 'Service category filter. Omit when not explicitly requested; never send an empty string.' },
           },
         },
       },
@@ -145,7 +147,9 @@ export async function startServer(): Promise<void> {
 
     let result: unknown;
     if (name === 'nitrograph_discover') {
-      result = await discover(args as any);
+      const normalized = normalizeDiscoverArgs(args as any);
+      if ('error' in normalized) return textResult(normalized.error);
+      result = await discover(normalized.value);
     } else if (name === 'nitrograph_service_detail') {
       const slug = (args as any).slug;
       if (typeof slug !== 'string' || !slug) {
@@ -179,4 +183,38 @@ export async function startServer(): Promise<void> {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+}
+
+function normalizeDiscoverArgs(args: any): { value: any } | { error: string } {
+  const out: any = { ...args };
+  const filters = args?.filters && typeof args.filters === 'object' && !Array.isArray(args.filters)
+    ? args.filters
+    : null;
+  if (!filters) return { value: out };
+
+  const cleaned: Record<string, unknown> = {};
+  for (const key of Object.keys(filters)) {
+    if (!['rail', 'category', 'max_cost'].includes(key)) {
+      return { error: `Error: unsupported discover filter "${key}". Omit filters unless the user explicitly requested rail, category, or max_cost.` };
+    }
+  }
+
+  for (const key of ['rail', 'category'] as const) {
+    const value = filters[key];
+    if (typeof value === 'string' && value.trim() !== '') cleaned[key] = value.trim();
+    if (value != null && (typeof value !== 'string' || value.trim() === '')) {
+      return { error: `Error: omit filters.${key} when unused; do not send empty/default filters.` };
+    }
+  }
+
+  if (filters.max_cost != null) {
+    if (typeof filters.max_cost !== 'number' || !Number.isFinite(filters.max_cost) || filters.max_cost <= 0) {
+      return { error: 'Error: filters.max_cost must be greater than 0. Omit filters.max_cost for no price filter; max_cost: 0 means free-only and is not accepted.' };
+    }
+    cleaned.max_cost = filters.max_cost;
+  }
+
+  if (Object.keys(cleaned).length > 0) out.filters = cleaned;
+  else delete out.filters;
+  return { value: out };
 }

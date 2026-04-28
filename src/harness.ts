@@ -211,9 +211,23 @@ export class Nitrograph {
     const { rail, max_cost, category } = o;
     if (rail == null && max_cost == null && category == null) return null;
     const f: DiscoverFilters = {};
-    if (rail != null) f.rail = rail;
-    if (max_cost != null) f.max_cost = max_cost;
-    if (category != null) f.category = category;
+    if (rail != null) {
+      const normalized = String(rail).trim();
+      if (!normalized) throw new NitrographError('rail filter must be non-empty; omit rail for no rail filter');
+      f.rail = normalized;
+    }
+    if (max_cost != null) {
+      if (!Number.isFinite(max_cost) || max_cost <= 0) {
+        throw new NitrographError('max_cost must be greater than 0; omit max_cost for no price filter');
+      }
+      f.max_cost = max_cost;
+    }
+    if (category != null) {
+      const normalized = String(category).trim();
+      if (!normalized) throw new NitrographError('category filter must be non-empty; omit category for no category filter');
+      f.category = normalized;
+    }
+    if (Object.keys(f).length === 0) return null;
     return f;
   }
 

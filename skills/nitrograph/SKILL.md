@@ -18,16 +18,21 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 ## Discovery Workflow
 
 1. Run discovery with the user's task as a natural-language query.
-2. Present `results` as the ranked, high-confidence recommendations.
-3. Keep `related_results` separate as lower-confidence fallbacks. Do not promote them into recommendations.
-4. Do not reorder, regroup, or add your own "notably absent" recommendations. Nitrograph ranking is authoritative.
-5. Before invoking a service, fetch service detail for the selected service using the stable `slug`.
-6. Use service detail/OpenAPI as the source of truth for callable paths, methods, schemas, payment info, gotchas, and proven patterns.
-7. After any invocation, report the outcome with success/failure, endpoint, latency, and a concise failure diagnosis when applicable.
+2. Omit `filters` unless the user explicitly requested a rail, category, or price ceiling.
+3. Present `results` as the ranked, high-confidence recommendations.
+4. Keep `related_results` separate as lower-confidence fallbacks. Do not promote them into recommendations.
+5. Do not reorder, regroup, or add your own "notably absent" recommendations. Nitrograph ranking is authoritative.
+6. Before invoking a service, fetch service detail for the selected service using the stable `slug`.
+7. Use service detail/OpenAPI as the source of truth for callable paths, methods, schemas, payment info, gotchas, and proven patterns.
+8. After any invocation, report the outcome with success/failure, endpoint, latency, and a concise failure diagnosis when applicable.
 
 ## Critical Invocation Rules
 
 - Do not invent endpoints from discover results.
+- Do not include `filters: {}` or default filters.
+- Do not send `rail: ""` or `category: ""`. Omit those fields when unused.
+- Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` means free-only and is rejected; omit `max_cost` unless the user asked for a price ceiling.
+- If Nitrograph says "No services matched" for a broad/common commercial query, immediately inspect `filters_applied` before concluding no services exist.
 - Treat discover `route` or `route.call` as a routing preview only. It may be inferred or less specific than service detail.
 - Use `slug` for programmatic follow-up calls. `display_slug` is for human-readable output.
 - If service detail includes `openapi.paths`, prefer those paths and methods over the discover preview.
