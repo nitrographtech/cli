@@ -1,0 +1,15 @@
+interface:
+  display_name: "Nitrograph"
+  short_description: "Find and inspect agent-usable APIs"
+  default_prompt: "Use $nitrograph to find the best API for this task, inspect the top result, and explain how to call it."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "nitrograph"
+      description: "Nitrograph service discovery MCP server"
+      transport: "streamable_http"
+      url: "https://api.nitrograph.com/mcp"
+
+policy:
+  allow_implicit_invocation: true
