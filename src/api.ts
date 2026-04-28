@@ -89,8 +89,9 @@ export function discover(input: DiscoverInput): Promise<ApiResult<DiscoverResult
   });
 }
 
-export function serviceDetail(slug: string): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>(`/v1/service/${encodeURIComponent(slug)}`, {
+export function serviceDetail(slug: string, task?: string): Promise<ApiResult<Record<string, unknown>>> {
+  const qs = task && task.trim() !== '' ? `?task=${encodeURIComponent(task.trim())}` : '';
+  return request<Record<string, unknown>>(`/v1/service/${encodeURIComponent(slug)}${qs}`, {
     method: 'GET',
   });
 }

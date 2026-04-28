@@ -173,9 +173,11 @@ export class Nitrograph {
     return this.request<DiscoverResponse>('POST', '/v1/discover', payload);
   }
 
-  async serviceDetail(slug: string): Promise<ServiceDetail> {
+  async serviceDetail(slug: string, opts: { task?: string } | string = {}): Promise<ServiceDetail> {
     if (!slug) throw new NitrographError('slug is required');
-    return this.request<ServiceDetail>('GET', `/v1/service/${encodeURIComponent(slug)}`);
+    const task = typeof opts === 'string' ? opts : opts.task;
+    const qs = task && task.trim() !== '' ? `?task=${encodeURIComponent(task.trim())}` : '';
+    return this.request<ServiceDetail>('GET', `/v1/service/${encodeURIComponent(slug)}${qs}`);
   }
 
   async reportOutcome(input: ReportOutcomeInput): Promise<unknown> {

@@ -43,11 +43,12 @@ const TOOLS = [
   {
     name: 'nitrograph_service_detail',
     description:
-      'Fetch full detail for a selected service by slug. Returns a call_card: the agent-readable invocation plan with endpoint options, request schemas, cost/payment handling, 402 interpretation, gotchas, proven patterns, and outcome-reporting policy. Use call_card as the primary guide for invoking; OpenAPI remains the schema source of truth.',
+      'Fetch full detail for a selected service by slug. Include task when you know the user task so call_card can rank endpoints and return a recommended_endpoint. Returns a call_card: the agent-readable invocation plan with endpoint options, request schemas, cost/payment handling, 402 interpretation, gotchas, proven patterns, and outcome-reporting policy. Use call_card as the primary guide for invoking; OpenAPI remains the schema source of truth.',
     inputSchema: {
       type: 'object',
       properties: {
         slug: { type: 'string', description: 'Service slug as returned by nitrograph_discover.' },
+        task: { type: 'string', description: 'Optional original user task/query. Include it so Nitrograph can rank endpoint options for this selection.' },
       },
       required: ['slug'],
     },
@@ -155,7 +156,8 @@ export async function startServer(): Promise<void> {
       if (typeof slug !== 'string' || !slug) {
         return textResult('Error: slug is required');
       }
-      result = await serviceDetail(slug);
+      const task = typeof (args as any).task === 'string' ? (args as any).task : undefined;
+      result = await serviceDetail(slug, task);
     } else if (name === 'nitrograph_report_outcome') {
       result = await reportOutcome(args as any);
     } else if (name === 'nitrograph_report_pattern') {
