@@ -5,22 +5,29 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
 <p align="center">
-  <img src="assets/nitrograph-hero.svg" alt="Nitrograph service discovery network" width="100%">
+  <img src="assets/nitrograph-hero.svg" alt="Nitrograph service discovery for agents" width="100%">
 </p>
 
-Find the right API for an agent. Inspect how to call it. Report whether it worked.
+**Your agent needs a service. Nitrograph finds it, ranks it, and tells the agent how to call it.**
 
-Nitrograph is a service discovery network for agent-usable APIs, including x402 and MPP services. It ranks services by task relevance, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.
+Nitrograph indexes agent-usable APIs across x402 and MPP, ranks them by task fit, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.
 
 ```bash
 npm i nitrograph
 ```
 
+## What Happens
+
+1. Your agent describes what it needs in plain language.
+2. Nitrograph returns ranked services with trust signals, pricing, health, and call details.
+3. The agent inspects the selected service before invocation. You stay in control of spending.
+4. The outcome feeds the trust graph. Every reported transaction makes future search smarter.
+
 ## Quick Start
 
-### Option 1: With an AI agent
+### Option 1: With an AI Agent
 
-Install the Nitrograph skill, then ask your agent to find a service:
+Install the Nitrograph skill, then talk to your agent normally:
 
 ```bash
 npx skills add nitrographtech/cli
@@ -28,23 +35,23 @@ npx skills add nitrographtech/cli
 
 Example prompts:
 
-> Using the Nitrograph skill, find a lead generation API, inspect the best result, and tell me how to call it.
+> Find me a lead generation API and show me the best options with pricing.
 
-> Use Nitrograph to find an image generation service. Show recommended results separately from related lower-confidence matches.
+> Find an image generation service under $0.05 per call.
 
-> Find a data enrichment service, call service detail for the top result, and report the outcome after invocation.
+> Find a data enrichment service, show me how to call the top result, then run it.
 
-The skill teaches agents the Nitrograph workflow: discover first, treat `results` as high-confidence recommendations, treat `related_results` as semantic fallbacks, call service detail before invocation, and report outcomes afterward.
+The skill teaches your agent the full workflow: search for services, compare options, treat `results` as high-confidence recommendations, treat `related_results` as lower-confidence fallbacks, inspect before calling, and report what worked.
 
 ### Option 2: Hosted MCP
 
-Register Nitrograph as a remote MCP server:
+Register Nitrograph as a remote MCP server, no local install needed:
 
 ```text
 https://api.nitrograph.com/mcp
 ```
 
-No npm install, subprocess, or API key required. Use this when your MCP client supports remote HTTP servers.
+Use this when your MCP client supports remote HTTP servers.
 
 ### Option 3: Local MCP
 
@@ -54,7 +61,7 @@ npx nitrograph
 
 The wizard detects installed MCP clients and writes a stdio server entry into each config file, creating `.bak` backups first. If stdin is not a TTY, it runs hands-off and installs into every detected client.
 
-### Option 4: TypeScript Harness
+### Option 4: TypeScript
 
 ```ts
 import { Nitrograph } from 'nitrograph';
@@ -76,22 +83,24 @@ await ng.reportOutcome({
 });
 ```
 
-## Why Nitrograph?
+## Why Nitrograph
 
-- Agent-first discovery: natural-language service search, not keyword docs browsing.
-- High-confidence ranking: primary `results` are separated from lower-confidence `related_results`.
-- Call readiness: service detail returns endpoints, schemas, health, costs, gotchas, and proven patterns.
-- Feedback loop: agents report success/failure, and future rankings learn from outcomes.
-- Multi-surface: one network exposed through hosted MCP, local MCP, TypeScript, and raw HTTP.
+**Agents find services by guessing. That does not scale.** Today, agents browse documentation, hardcode endpoints, and hope for the best. Nitrograph gives them a task-aware discovery layer.
+
+**Rankings come from behavior, not marketing.** Agents can report outcomes after service calls, giving future searches better signals about uptime, latency, success rate, cost accuracy, and integration gotchas.
+
+**Discovery and execution fit in one flow.** Search returns ranked results. Service detail returns endpoints, schemas, costs, health, gotchas, and patterns that worked for other agents.
+
+**You control spending.** Nitrograph shows options with real pricing before the agent invokes a service.
 
 ## MCP Tools
 
 | Tool | Purpose |
 |---|---|
-| `nitrograph_discover` | Search by natural-language task. Returns recommended `results` and lower-confidence `related_results`. |
-| `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven patterns for a service. |
-| `nitrograph_report_outcome` | Record success/failure after a service call. Feeds trust and gotcha promotion. |
-| `nitrograph_report_pattern` | Record a successful reusable multi-step workflow. |
+| `nitrograph_discover` | Search by task in plain language. Returns ranked `results` and lower-confidence `related_results`. |
+| `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven call patterns for a specific service. |
+| `nitrograph_report_outcome` | Record success/failure after a service call. Feeds trust rankings and gotcha promotion. |
+| `nitrograph_report_pattern` | Record a reusable multi-step workflow that worked. |
 
 ## Harness API
 
@@ -122,7 +131,7 @@ curl -sX POST https://api.nitrograph.com/v1/discover \
 curl -s https://api.nitrograph.com/v1/service/apollo
 ```
 
-## Skills
+## Skills And Plugins
 
 Nitrograph ships an agent skill at:
 
@@ -136,11 +145,7 @@ Install from GitHub:
 npx skills add nitrographtech/cli
 ```
 
-For Codex plugin-style installs, sparse-install the skill surface:
-
-```bash
-codex plugin marketplace add nitrographtech/cli --sparse skills
-```
+The repository also includes `.codex-plugin/plugin.json` so the same skill surface can be used by Codex plugin workflows as that ecosystem stabilizes.
 
 ## Config
 
@@ -152,7 +157,7 @@ codex plugin marketplace add nitrographtech/cli --sparse skills
 }
 ```
 
-The free tier requires no config. When the free tier is exhausted, Nitrograph returns a pay-to-continue URL; the returned session token can be passed as `NITROGRAPH_SESSION_TOKEN`.
+The free tier requires no config and no API key. When the free tier is exhausted, Nitrograph returns a pay-to-continue URL; the returned session token can be passed as `NITROGRAPH_SESSION_TOKEN`.
 
 ## Links
 

@@ -307,4 +307,4 @@ export function createNitrograph(opts: NitrographOptions = {}): Nitrograph {
 // bumping version in package.json does not require touching this file.
 // (The CLI reads the same file from disk — here we inline a literal because
 // library consumers may be bundling and we can't assume fs access.)
-const LIB_VERSION = '0.5.0';
+const LIB_VERSION = '0.5.1';
