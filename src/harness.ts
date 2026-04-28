@@ -68,6 +68,7 @@ export interface ServiceDetail {
   rails?: string[] | null;
   cost_per_call?: number | null;
   endpoints?: unknown[];
+  call_card?: unknown;
   openapi_spec?: unknown;
   gotchas?: unknown[];
   proven_patterns?: unknown[];

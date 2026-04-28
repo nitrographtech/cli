@@ -23,8 +23,9 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 4. Keep `related_results` separate as lower-confidence fallbacks. Do not promote them into recommendations.
 5. Do not reorder, regroup, or add your own "notably absent" recommendations. Nitrograph ranking is authoritative.
 6. Before invoking a service, fetch service detail for the selected service using the stable `slug`.
-7. Use service detail/OpenAPI as the source of truth for callable paths, methods, schemas, payment info, gotchas, and proven patterns.
-8. After any invocation, report the outcome with success/failure, endpoint, latency, and a concise failure diagnosis when applicable.
+7. Use `service_detail.call_card` as the executable invocation plan. It tells you endpoint options, request schemas, payment behavior, gotchas, proven patterns, and when to report outcomes.
+8. Use service detail/OpenAPI as the schema source of truth for callable paths, methods, and request bodies.
+9. After a paid service actually runs, report the outcome with success/failure, endpoint, latency, and a concise failure diagnosis when applicable.
 
 ## Critical Invocation Rules
 
@@ -34,6 +35,7 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 - Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` means free-only and is rejected; omit `max_cost` unless the user asked for a price ceiling.
 - If Nitrograph says "No services matched" for a broad/common commercial query, immediately inspect `filters_applied` before concluding no services exist.
 - Treat discover `route` or `route.call` as a routing preview only. It may be inferred or less specific than service detail.
+- Treat `call_card` as the selected service's call plan.
 - Use `slug` for programmatic follow-up calls. `display_slug` is for human-readable output.
 - If service detail includes `openapi.paths`, prefer those paths and methods over the discover preview.
 - If a call fails, report the actual root cause. Do not report generic "API failed" diagnoses.

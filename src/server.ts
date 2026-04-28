@@ -43,7 +43,7 @@ const TOOLS = [
   {
     name: 'nitrograph_service_detail',
     description:
-      'Fetch full detail for a single service by slug: endpoints, OpenAPI spec (if available), cost, base URL, current health, any gotchas/patterns the probe fleet and prior agents have mapped, and reliability (successful calls ÷ total calls from report_outcome data). Call after nitrograph_discover to get enough detail to invoke the service.',
+      'Fetch full detail for a selected service by slug. Returns a call_card: the agent-readable invocation plan with endpoint options, request schemas, cost/payment handling, 402 interpretation, gotchas, proven patterns, and outcome-reporting policy. Use call_card as the primary guide for invoking; OpenAPI remains the schema source of truth.',
     inputSchema: {
       type: 'object',
       properties: {
