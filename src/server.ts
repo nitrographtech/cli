@@ -55,7 +55,7 @@ const TOOLS = [
   {
     name: 'nitrograph_report_outcome',
     description:
-      'Report the outcome of a call to a discovered service. Always call this after an invocation, success or failure — outcomes feed trust_boost, which slides the service up or down in future ranks. On failure, include a diagnosis (one sentence describing what broke) and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent. This is how the network compounds.',
+      'Report the outcome of a paid/service call after it actually ran. Do NOT report 402 Payment Required, payment challenge, insufficient balance, or missing payment as a service failure; surface payment instructions to the user and wait until payment is complete. Outcomes feed trust_boost, so only real provider successes/failures should be reported. On genuine failure, include a diagnosis and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent.',
     inputSchema: {
       type: 'object',
       properties: {

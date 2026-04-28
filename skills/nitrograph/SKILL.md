@@ -38,6 +38,7 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 - If service detail includes `openapi.paths`, prefer those paths and methods over the discover preview.
 - If a call fails, report the actual root cause. Do not report generic "API failed" diagnoses.
 - If Nitrograph returns payment required, surface the `pay_at` URL or payment instructions to the user before continuing.
+- Do not report `402 Payment Required`, payment challenges, insufficient balance, or missing payment as service failures. Payment required means the service has not run yet, so it is neutral.
 
 ## MCP Tool Use
 
@@ -45,7 +46,7 @@ When calling `nitrograph_discover`, the tool's returned markdown display is auth
 
 Use `nitrograph_service_detail` after discovery when the user wants to call, inspect, compare deeply, or implement against a service.
 
-Use `nitrograph_report_outcome` after any attempted service invocation:
+Use `nitrograph_report_outcome` only after the service actually ran and produced a success or genuine provider failure. Do not call it for `402 Payment Required` or payment challenges.
 
 ```json
 {
