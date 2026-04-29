@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
 <p align="center">
-  <img src="assets/nitrograph-readme-demo.gif" alt="Nitrograph demo - an agent query becomes ranked paid API recommendations" width="100%">
+  <img src="https://raw.githubusercontent.com/nitrographtech/cli/main/assets/nitrograph-readme-demo.gif" alt="Nitrograph demo - an agent query becomes ranked paid API recommendations" width="100%">
 </p>
 
 **Your agent needs a service. Nitrograph finds it, ranks it, and tells the agent how to call it.**
