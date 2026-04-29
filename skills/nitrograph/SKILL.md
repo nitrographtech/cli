@@ -42,6 +42,8 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 - If a call fails, report the actual root cause. Do not report generic "API failed" diagnoses.
 - If Nitrograph returns payment required, surface the `pay_at` URL or payment instructions to the user before continuing.
 - Do not report `402 Payment Required`, payment challenges, insufficient balance, or missing payment as service failures. Payment required means the service has not run yet, so it is neutral.
+- Do not send secrets, private keys, bearer tokens, passwords, raw customer payloads, confidential customer data, or full downstream service responses to Nitrograph.
+- Keep outcome reports and pattern reports concise and operational. Report generalized diagnoses, fixes, and reusable templates rather than sensitive raw data.
 
 ## MCP Tool Use
 
@@ -164,3 +166,5 @@ curl -sX POST https://api.nitrograph.com/v1/service/apollo/report-outcome \
 ## Docs
 
 Full agent docs: https://nitrograph.com/llms-full.txt
+Privacy: https://nitrograph.com/privacy
+Terms: https://nitrograph.com/terms

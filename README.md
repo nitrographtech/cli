@@ -49,14 +49,20 @@ Nitrograph is packaged as a Codex plugin with:
 - `.mcp.json` for the hosted Nitrograph MCP server at `https://api.nitrograph.com/mcp`.
 - `.codex-plugin/plugin.json` with install-surface metadata for the Codex plugin directory.
 
-Until self-serve official plugin publishing is available, test it as a repo marketplace:
+Install it in Codex today by adding the Nitrograph repo marketplace:
 
 ```bash
-codex plugin marketplace add https://github.com/nitrographtech/cli.git --sparse .agents/plugins
+codex plugin marketplace add nitrographtech/cli --sparse .agents/plugins
 codex plugin marketplace upgrade nitrograph-plugins
 ```
 
-Then install Nitrograph from the Codex plugin directory.
+Restart Codex, open the plugin directory, select **Nitrograph Plugins**, and install **Nitrograph**. The plugin adds the Nitrograph skill plus the hosted MCP server configuration.
+
+If the marketplace is already installed, refresh it with:
+
+```bash
+codex plugin marketplace upgrade nitrograph-plugins
+```
 
 ### Option 2: Hosted MCP
 

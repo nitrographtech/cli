@@ -23,6 +23,8 @@
     "assets/nitrograph-logo.svg",
     "assets/nitrograph-readme-demo.gif",
     ".codex-plugin",
+    ".agents/plugins/marketplace.json",
+    "CODEX_PLUGIN.md",
     "README.md",
     "LICENSE"
   ],
