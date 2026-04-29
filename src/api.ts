@@ -71,7 +71,8 @@ export interface DiscoverInput {
   limit?: number;
   filters?: {
     rail?: string;
-    max_cost?: number;
+    max_cost?: number | 'any';
+    min_trust?: number | 'any';
     category?: string;
   };
 }

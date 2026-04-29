@@ -68,6 +68,21 @@ https://api.nitrograph.com/mcp
 
 Use this when your MCP client supports remote HTTP servers.
 
+MCP discover calls should send complete filter state every time. Use `"any"` for unset filters so MCP hosts do not accidentally retain stale nested filter values:
+
+```json
+{
+  "query": "lead generation",
+  "limit": 10,
+  "filters": {
+    "rail": "any",
+    "max_cost": "any",
+    "min_trust": "any",
+    "category": "any"
+  }
+}
+```
+
 ### Option 3: Local MCP
 
 ```bash
@@ -85,6 +100,14 @@ const ng = new Nitrograph();
 
 const { results, related_results } = await ng.discover('lead generation', {
   limit: 10,
+});
+
+const filtered = await ng.discover('lead generation', {
+  limit: 10,
+  category: 'lead_generation',
+  rail: 'any',
+  max_cost: 'any',
+  min_trust: 'any',
 });
 
 const best = results[0];
@@ -140,6 +163,14 @@ Errors extend `NitrographError`:
 curl -sX POST https://api.nitrograph.com/v1/discover \
   -H 'content-type: application/json' \
   -d '{"query":"lead generation","limit":10}'
+```
+
+Raw HTTP filters are optional, but when provided they belong under `filters`:
+
+```bash
+curl -sX POST https://api.nitrograph.com/v1/discover \
+  -H 'content-type: application/json' \
+  -d '{"query":"lead generation","limit":10,"filters":{"category":"lead_generation"}}'
 ```
 
 ```bash

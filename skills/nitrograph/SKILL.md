@@ -18,7 +18,7 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 ## Discovery Workflow
 
 1. Run discovery with the user's task as a natural-language query.
-2. Omit `filters` unless the user explicitly requested a rail, category, or price ceiling.
+2. For MCP discovery, always send a complete `filters` object. Use `"any"` for each unset filter so stale nested values are cleared reliably.
 3. Present `results` as the ranked, high-confidence recommendations.
 4. Keep `related_results` separate as lower-confidence fallbacks. Do not promote them into recommendations.
 5. Do not reorder, regroup, or add your own "notably absent" recommendations. Nitrograph ranking is authoritative.
@@ -30,9 +30,10 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 ## Critical Invocation Rules
 
 - Do not invent endpoints from discover results.
-- Do not include `filters: {}` or default filters.
-- Do not send `rail: ""` or `category: ""`. Omit those fields when unused.
-- Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` means free-only and is rejected; omit `max_cost` unless the user asked for a price ceiling.
+- Do not include `filters: {}` in MCP calls. Send `rail`, `max_cost`, `min_trust`, and `category` every time.
+- Do not send `rail: ""` or `category: ""`. Use `"any"` when unused.
+- Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` is rejected; use `"any"` unless the user asked for a price ceiling.
+- Do not send `null` to clear filters. Use `"any"`.
 - If Nitrograph says "No services matched" for a broad/common commercial query, immediately inspect `filters_applied` before concluding no services exist.
 - Treat discover `route` or `route.call` as a routing preview only. It may be inferred or less specific than service detail.
 - Treat `call_card` as the selected service's call plan. If `call_card.invocation.recommended_endpoint` is present, start there unless it clearly conflicts with the user's task.
@@ -45,6 +46,36 @@ Nitrograph is a discovery layer for agent-usable services. Use it to find APIs f
 ## MCP Tool Use
 
 When calling `nitrograph_discover`, the tool's returned markdown display is authoritative user-facing output. Return it as-is when the user asked to see search results. Do not paraphrase or regroup it.
+
+Canonical MCP discover call with no active filters:
+
+```json
+{
+  "query": "lead generation",
+  "limit": 10,
+  "filters": {
+    "rail": "any",
+    "max_cost": "any",
+    "min_trust": "any",
+    "category": "any"
+  }
+}
+```
+
+Filtered MCP discover call. Keep every filter field present and use `"any"` for the filters the user did not request:
+
+```json
+{
+  "query": "lead generation",
+  "limit": 10,
+  "filters": {
+    "rail": "x402",
+    "max_cost": "any",
+    "min_trust": "any",
+    "category": "lead_generation"
+  }
+}
+```
 
 Use `nitrograph_service_detail` after discovery when the user wants to call, inspect, compare deeply, or implement against a service. Pass the original task/query as `task` so Nitrograph can rank endpoints for the selected service.
 
@@ -75,6 +106,14 @@ const { results, related_results } = await ng.discover('lead generation', {
   limit: 10,
 });
 
+await ng.discover('lead generation', {
+  limit: 10,
+  category: 'lead_generation',
+  rail: 'any',
+  max_cost: 'any',
+  min_trust: 'any',
+});
+
 const service = results[0];
 const detail = await ng.serviceDetail(service.slug, {
   task: 'lead generation',
@@ -89,6 +128,14 @@ Discover:
 curl -sX POST https://api.nitrograph.com/v1/discover \
   -H 'content-type: application/json' \
   -d '{"query":"lead generation","limit":10}'
+```
+
+Raw HTTP filters are optional. When present, put them under `filters`:
+
+```bash
+curl -sX POST https://api.nitrograph.com/v1/discover \
+  -H 'content-type: application/json' \
+  -d '{"query":"lead generation","limit":10,"filters":{"category":"lead_generation"}}'
 ```
 
 Service detail:

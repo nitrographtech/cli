@@ -50,6 +50,12 @@ Discover results are pre-formatted as markdown by the API server. The
 CLI tool description instructs the LLM to output it *verbatim* — no
 reorder, no commentary — because the ranking is load-bearing.
 
+`nitrograph_discover` exposes filters only through a nested `filters`
+object. MCP callers are expected to send `rail`, `max_cost`,
+`min_trust`, and `category` on every call, using `"any"` for unset
+filters so hosts that deep-merge arguments do not retain stale nested
+values.
+
 ---
 
 ## 3. Directory tour

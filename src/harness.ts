@@ -18,8 +18,9 @@ export interface NitrographOptions {
 }
 
 export interface DiscoverFilters {
-  rail?: 'x402' | 'mpp' | 'stripe' | 'none' | string;
-  max_cost?: number;
+  rail?: 'x402' | 'mpp' | 'stripe' | 'none' | 'any' | string;
+  max_cost?: number | 'any';
+  min_trust?: number | 'any';
   category?: string;
 }
 
@@ -211,23 +212,35 @@ export class Nitrograph {
 
   private pickFilters(o: ({ limit?: number } & DiscoverFilters) | undefined): DiscoverFilters | null {
     if (!o) return null;
-    const { rail, max_cost, category } = o;
-    if (rail == null && max_cost == null && category == null) return null;
+    const { rail, max_cost, min_trust, category } = o;
+    if (rail == null && max_cost == null && min_trust == null && category == null) return null;
     const f: DiscoverFilters = {};
     if (rail != null) {
       const normalized = String(rail).trim();
-      if (!normalized) throw new NitrographError('rail filter must be non-empty; omit rail for no rail filter');
+      if (!normalized) throw new NitrographError('rail filter must be non-empty; use "any" or omit rail for no rail filter');
       f.rail = normalized;
     }
     if (max_cost != null) {
-      if (!Number.isFinite(max_cost) || max_cost <= 0) {
-        throw new NitrographError('max_cost must be greater than 0; omit max_cost for no price filter');
+      if (max_cost === 'any') {
+        f.max_cost = 'any';
+      } else if (typeof max_cost !== 'number' || !Number.isFinite(max_cost) || max_cost <= 0) {
+        throw new NitrographError('max_cost must be greater than 0 or "any"; do not use 0 for no price filter');
+      } else {
+        f.max_cost = max_cost;
       }
-      f.max_cost = max_cost;
+    }
+    if (min_trust != null) {
+      if (min_trust === 'any') {
+        f.min_trust = 'any';
+      } else if (typeof min_trust !== 'number' || !Number.isFinite(min_trust) || min_trust < 0) {
+        throw new NitrographError('min_trust must be greater than or equal to 0 or "any"');
+      } else {
+        f.min_trust = min_trust;
+      }
     }
     if (category != null) {
       const normalized = String(category).trim();
-      if (!normalized) throw new NitrographError('category filter must be non-empty; omit category for no category filter');
+      if (!normalized) throw new NitrographError('category filter must be non-empty; use "any" or omit category for no category filter');
       f.category = normalized;
     }
     if (Object.keys(f).length === 0) return null;

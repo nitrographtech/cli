@@ -17,7 +17,7 @@ const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
-      'Search the Nitrograph registry of agent-usable services. IMPORTANT: omit filters unless the user explicitly requested a rail, category, or price ceiling. Do not send filters: {}. Do not send rail: "" or category: "". Do not send max_cost: 0 for "no cost filter"; max_cost: 0 means free-only and will be rejected. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The pre-formatted markdown display is authoritative: recommended results are primary, related_results are not recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not promote related_results into primary recommendations. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
+      'Search the Nitrograph registry of agent-usable services. IMPORTANT: always send a complete filters object on every call. Use "any" for each unset filter; do not omit nested filter fields to clear them because some MCP hosts retain omitted fields from previous calls. Do not send filters: {}. Do not send rail: "" or category: "". Do not send max_cost: 0 for "no cost filter"; max_cost: 0 will be rejected. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The pre-formatted markdown display is authoritative: recommended results are primary, related_results are not recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. OUTPUT CONTRACT: the tool result IS the response. Output it to the user exactly as returned. Do not re-group by category. Do not add recommendations, commentary, or "Notably absent" notes. Do not reorder rows. Do not promote related_results into primary recommendations. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -28,16 +28,38 @@ const TOOLS = [
         limit: { type: 'number', description: 'Max results (1–50). Default 10.' },
         filters: {
           type: 'object',
-          description: 'Optional. Omit entirely unless the user explicitly requested filtering. Empty/default filters change ranking behavior and must not be sent.',
+          description: 'Complete discover filter state. Send this object every time. Use "any" for no filter; do not omit fields to clear them.',
           additionalProperties: false,
           properties: {
-            rail: { type: 'string', description: 'Payment rail: x402, mpp, stripe, none. Omit when not explicitly requested; never send an empty string.' },
-            max_cost: { type: 'number', exclusiveMinimum: 0, description: 'Max cost per call in USD. Must be greater than 0. Omit for no price filter; do not send 0.' },
-            category: { type: 'string', description: 'Service category filter. Omit when not explicitly requested; never send an empty string.' },
+            rail: {
+              type: 'string',
+              minLength: 1,
+              description: 'Payment rail filter: x402, mpp, stripe, none, or "any" for no rail filter.',
+            },
+            max_cost: {
+              anyOf: [
+                { type: 'number', exclusiveMinimum: 0 },
+                { type: 'string', enum: ['any'] },
+              ],
+              description: 'Max cost per call in USD. Use "any" for no price filter; do not send 0.',
+            },
+            min_trust: {
+              anyOf: [
+                { type: 'number', minimum: 0 },
+                { type: 'string', enum: ['any'] },
+              ],
+              description: 'Minimum trust score. Use "any" for no trust filter.',
+            },
+            category: {
+              type: 'string',
+              minLength: 1,
+              description: 'Service category filter. Use "any" for no category filter.',
+            },
           },
+          required: ['rail', 'max_cost', 'min_trust', 'category'],
         },
       },
-      required: ['query'],
+      required: ['query', 'filters'],
     },
   },
   {
@@ -189,34 +211,70 @@ export async function startServer(): Promise<void> {
 
 function normalizeDiscoverArgs(args: any): { value: any } | { error: string } {
   const out: any = { ...args };
+  for (const key of ['rail', 'category', 'max_cost', 'min_trust'] as const) {
+    if (key in out) {
+      return { error: `Error: unsupported root-level discover filter "${key}". Put discover filters under filters.${key}.` };
+    }
+  }
+
   const filters = args?.filters && typeof args.filters === 'object' && !Array.isArray(args.filters)
     ? args.filters
     : null;
-  if (!filters) return { value: out };
+  if (!filters) {
+    return { error: 'Error: filters is required for nitrograph_discover. Send filters with rail, max_cost, min_trust, and category; use "any" for unset filters.' };
+  }
 
   const cleaned: Record<string, unknown> = {};
   for (const key of Object.keys(filters)) {
-    if (!['rail', 'category', 'max_cost'].includes(key)) {
-      return { error: `Error: unsupported discover filter "${key}". Omit filters unless the user explicitly requested rail, category, or max_cost.` };
+    if (!['rail', 'category', 'max_cost', 'min_trust'].includes(key)) {
+      return { error: `Error: unsupported discover filter "${key}". Supported filters are rail, max_cost, min_trust, and category.` };
+    }
+  }
+
+  for (const key of ['rail', 'max_cost', 'min_trust', 'category'] as const) {
+    if (!(key in filters)) {
+      return { error: `Error: filters.${key} is required for nitrograph_discover. Use "any" when no ${key} filter is wanted.` };
+    }
+    if (filters[key] === undefined) {
+      return { error: `Error: filters.${key} is required for nitrograph_discover. Use "any" when no ${key} filter is wanted.` };
+    }
+    if (filters[key] === null) {
+      return { error: `Error: filters.${key} must not be null. Use "any" when no ${key} filter is wanted.` };
     }
   }
 
   for (const key of ['rail', 'category'] as const) {
     const value = filters[key];
+    if (value === 'any') {
+      cleaned[key] = 'any';
+      continue;
+    }
     if (typeof value === 'string' && value.trim() !== '') cleaned[key] = value.trim();
     if (value != null && (typeof value !== 'string' || value.trim() === '')) {
-      return { error: `Error: omit filters.${key} when unused; do not send empty/default filters.` };
+      return { error: `Error: filters.${key} must be a non-empty string or "any".` };
     }
   }
 
   if (filters.max_cost != null) {
-    if (typeof filters.max_cost !== 'number' || !Number.isFinite(filters.max_cost) || filters.max_cost <= 0) {
-      return { error: 'Error: filters.max_cost must be greater than 0. Omit filters.max_cost for no price filter; max_cost: 0 means free-only and is not accepted.' };
+    if (filters.max_cost === 'any') {
+      cleaned.max_cost = 'any';
+    } else if (typeof filters.max_cost !== 'number' || !Number.isFinite(filters.max_cost) || filters.max_cost <= 0) {
+      return { error: 'Error: filters.max_cost must be greater than 0 or "any". Do not send 0 for no price filter.' };
+    } else {
+      cleaned.max_cost = filters.max_cost;
     }
-    cleaned.max_cost = filters.max_cost;
   }
 
-  if (Object.keys(cleaned).length > 0) out.filters = cleaned;
-  else delete out.filters;
+  if (filters.min_trust != null) {
+    if (filters.min_trust === 'any') {
+      cleaned.min_trust = 'any';
+    } else if (typeof filters.min_trust !== 'number' || !Number.isFinite(filters.min_trust) || filters.min_trust < 0) {
+      return { error: 'Error: filters.min_trust must be greater than or equal to 0 or "any".' };
+    } else {
+      cleaned.min_trust = filters.min_trust;
+    }
+  }
+
+  out.filters = cleaned;
   return { value: out };
 }
