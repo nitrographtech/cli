@@ -1,11 +1,52 @@
 {
   "name": "nitrograph",
-  "version": "0.5.1",
-  "description": "Find, inspect, and evaluate agent-usable APIs with Nitrograph.",
-  "skills": [
-    {
-      "name": "nitrograph",
-      "path": "../skills/nitrograph"
-    }
-  ]
+  "version": "0.5.4",
+  "description": "Find, inspect, and call agent-usable APIs across x402 and MPP with Nitrograph discovery, ranking, call cards, and outcome reporting.",
+  "author": {
+    "name": "Nitrograph",
+    "email": "eric@nitrograph.com",
+    "url": "https://nitrograph.com"
+  },
+  "homepage": "https://nitrograph.com",
+  "repository": "https://github.com/nitrographtech/cli",
+  "license": "MIT",
+  "keywords": [
+    "nitrograph",
+    "mcp",
+    "service-discovery",
+    "agent",
+    "api-discovery",
+    "x402",
+    "mpp",
+    "payments",
+    "call-cards"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Nitrograph",
+    "shortDescription": "Find and call paid APIs from Codex",
+    "longDescription": "Use Nitrograph to discover ranked agent-usable APIs for a task, inspect pricing and health, fetch task-aware call cards with endpoint guidance, handle x402/MPP payment challenges correctly, and report successful or failed service outcomes so future searches improve.",
+    "developerName": "Nitrograph",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://nitrograph.com",
+    "privacyPolicyURL": "https://nitrograph.com/privacy",
+    "termsOfServiceURL": "https://nitrograph.com/terms",
+    "defaultPrompt": [
+      "Find a lead generation API and show the best options with pricing.",
+      "Find an image generation service under $0.05 per call.",
+      "Find a data enrichment API, inspect the top result, and show me the call card."
+    ],
+    "brandColor": "#111827",
+    "composerIcon": "./assets/nitrograph-icon.svg",
+    "logo": "./assets/nitrograph-logo.svg",
+    "screenshots": [
+      "./assets/nitrograph-readme-demo.gif"
+    ]
+  }
 }

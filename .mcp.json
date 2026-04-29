@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "nitrograph": {
+      "type": "http",
+      "url": "https://api.nitrograph.com/mcp",
+      "note": "Hosted Nitrograph MCP server for discovering ranked agent-usable APIs, fetching task-aware call cards, and reporting service outcomes. If local stdio is required instead, run `npx nitrograph`."
+    }
+  }
+}

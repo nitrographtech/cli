@@ -41,6 +41,23 @@ Example prompts:
 
 The skill teaches your agent the full workflow: search for services, compare options, treat `results` as high-confidence recommendations, treat `related_results` as lower-confidence fallbacks, inspect before calling, and report what worked.
 
+### Option 1b: Codex Plugin
+
+Nitrograph is packaged as a Codex plugin with:
+
+- `skills/nitrograph/SKILL.md` for the agent workflow.
+- `.mcp.json` for the hosted Nitrograph MCP server at `https://api.nitrograph.com/mcp`.
+- `.codex-plugin/plugin.json` with install-surface metadata for the Codex plugin directory.
+
+Until self-serve official plugin publishing is available, test it as a repo marketplace:
+
+```bash
+codex plugin marketplace add https://github.com/nitrographtech/cli.git --sparse .agents/plugins
+codex plugin marketplace upgrade nitrograph-plugins
+```
+
+Then install Nitrograph from the Codex plugin directory.
+
 ### Option 2: Hosted MCP
 
 Register Nitrograph as a remote MCP server, no local install needed:
