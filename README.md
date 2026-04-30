@@ -11,7 +11,7 @@
 Nitrograph indexes agent-usable APIs across x402 and MPP, ranks them by task fit, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.
 
 ```bash
-npm i nitrograph
+npm i -g nitrograph
 ```
 
 ## What Happens

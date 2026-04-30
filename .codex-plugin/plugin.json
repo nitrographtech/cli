@@ -1,6 +1,6 @@
 {
   "name": "nitrograph",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Find, inspect, and call agent-usable APIs across x402 and MPP with Nitrograph discovery, ranking, call cards, and outcome reporting.",
   "author": {
     "name": "Nitrograph",
