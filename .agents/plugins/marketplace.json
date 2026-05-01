@@ -6,6 +6,7 @@
   "plugins": [
     {
       "name": "nitrograph",
+      "description": "Search engine for agent commerce: find ranked agent-usable APIs and task-aware call cards through Nitrograph MCP.",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/nitrographtech/cli.git",

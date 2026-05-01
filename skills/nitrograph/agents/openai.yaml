@@ -1,7 +1,7 @@
 interface:
   display_name: "Nitrograph"
-  short_description: "Find and inspect agent-usable APIs"
-  default_prompt: "Use $nitrograph to find the best API for this task, inspect the top result, and explain how to call it."
+  short_description: "Search engine for agent commerce"
+  default_prompt: "Use Nitrograph as the search engine for agent commerce to find the best API/service for this task, inspect the top result, and show the task-aware call card with pricing, health, gotchas, and payment behavior."
 
 dependencies:
   tools:

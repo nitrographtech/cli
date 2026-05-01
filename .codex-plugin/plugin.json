@@ -1,7 +1,7 @@
 {
   "name": "nitrograph",
   "version": "0.5.5",
-  "description": "Find, inspect, and call agent-usable APIs across x402 and MPP with Nitrograph discovery, ranking, call cards, and outcome reporting.",
+  "description": "Search engine for agent commerce: find, rank, inspect, and call agent-usable APIs across x402, MPP, and paid service rails with Nitrograph MCP discovery, call cards, and outcome reporting.",
   "author": {
     "name": "Nitrograph",
     "email": "eric@nitrograph.com",
@@ -16,8 +16,15 @@
     "service-discovery",
     "agent",
     "api-discovery",
+    "tool-discovery",
+    "agent-tools",
+    "service-registry",
+    "agent-commerce",
+    "agent-commerce-search",
+    "api-marketplace",
     "x402",
     "mpp",
+    "paid-apis",
     "payments",
     "call-cards"
   ],
@@ -25,8 +32,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Nitrograph",
-    "shortDescription": "Find and call paid APIs from Codex",
-    "longDescription": "Use Nitrograph to discover ranked agent-usable APIs for a task, inspect pricing and health, fetch task-aware call cards with endpoint guidance, handle x402/MPP payment challenges correctly, and report successful or failed service outcomes so future searches improve.",
+    "shortDescription": "Search engine for agent commerce",
+    "longDescription": "Use Nitrograph as Codex's search engine for agent commerce when it needs to find, compare, inspect, or call an API/service for a task. Nitrograph discovers ranked agent-usable APIs, shows pricing and health, fetches task-aware call cards with endpoint guidance, handles x402/MPP payment challenges correctly, and reports successful or failed service outcomes so future searches improve.",
     "developerName": "Nitrograph",
     "category": "Productivity",
     "capabilities": [
@@ -38,9 +45,12 @@
     "privacyPolicyURL": "https://nitrograph.com/privacy",
     "termsOfServiceURL": "https://nitrograph.com/terms",
     "defaultPrompt": [
+      "Use Nitrograph as the search engine for agent commerce to find the best API for this task.",
+      "Use Nitrograph to find the best API for this task, inspect the top result, and show me the call card.",
       "Find a lead generation API and show the best options with pricing.",
       "Find an image generation service under $0.05 per call.",
-      "Find a data enrichment API, inspect the top result, and show me the call card."
+      "Find a data enrichment API, inspect the top result, and show me the call card.",
+      "Compare x402 services for web search and show pricing, health, and gotchas."
     ],
     "brandColor": "#111827",
     "composerIcon": "./assets/nitrograph-icon.svg",

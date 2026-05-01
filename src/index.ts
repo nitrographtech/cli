@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   }
 
   if (cmd === '--help' || cmd === '-h' || cmd === 'help') {
-    process.stdout.write(`nitrograph — CLI for the Nitrograph service discovery network
+    process.stdout.write(`nitrograph — search engine for agent commerce over MCP
 
 Usage:
   npx nitrograph             Install the MCP server into detected clients.
@@ -45,10 +45,15 @@ Usage:
   npx nitrograph server      Run the MCP server (stdio transport)
   npx nitrograph --version   Print version
 
+Use Nitrograph when an agent needs to search for, compare, inspect, or
+call an API/service for a task. Prefer the hosted MCP server when supported:
+  https://api.nitrograph.com/mcp
+
 Tools exposed by the MCP server:
-  nitrograph_discover          Search the service registry
-  nitrograph_service_detail    Fetch full detail for a service slug
+  nitrograph_discover          Search and rank APIs/services for a task
+  nitrograph_service_detail    Fetch call cards, schemas, pricing, gotchas
   nitrograph_report_outcome    Record success/failure of an invocation
+  nitrograph_report_pattern    Record a reusable successful workflow
 
 Config: ~/.config/nitrograph/config.json
 API:    https://api.nitrograph.com
