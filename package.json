@@ -24,6 +24,7 @@
     "assets/nitrograph-readme-demo.gif",
     ".codex-plugin",
     ".agents/plugins/marketplace.json",
+    "server.json",
     "CODEX_PLUGIN.md",
     "README.md",
     "LICENSE"

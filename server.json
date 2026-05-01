@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.nitrographtech/nitrograph",
+  "title": "Nitrograph",
+  "description": "Search engine for agent commerce and paid API discovery.",
+  "version": "0.5.6",
+  "websiteUrl": "https://nitrograph.com",
+  "repository": {
+    "url": "https://github.com/nitrographtech/cli",
+    "source": "github",
+    "id": "1214017723"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.nitrograph.com/mcp"
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "category": "search",
+      "tags": [
+        "agent-commerce",
+        "api-discovery",
+        "tool-discovery",
+        "service-discovery",
+        "paid-apis",
+        "x402",
+        "mpp"
+      ],
+      "localStdio": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "nitrograph",
+          "server"
+        ]
+      },
+      "npmPackage": "nitrograph",
+      "agentLoop": "discover -> service_detail -> inspect call_card -> call service -> report outcome/pattern"
+    }
+  }
+}
