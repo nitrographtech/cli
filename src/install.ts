@@ -96,13 +96,14 @@ function detectInstalled(targets: ClientTarget[]): ClientTarget[] {
   return targets.filter((t) => existsSync(t.configPath) || existsSync(dirname(t.configPath)));
 }
 
+// Throws on malformed JSON — callers must skip the target rather than
+// proceed, because writeJson would replace the user's config with just
+// our entry.
 function readJson(path: string): any {
   if (!existsSync(path)) return {};
-  try {
-    return JSON.parse(readFileSync(path, 'utf8'));
-  } catch {
-    return {};
-  }
+  const raw = readFileSync(path, 'utf8');
+  if (raw.trim() === '') return {};
+  return JSON.parse(raw);
 }
 
 function writeJson(path: string, obj: any): void {
@@ -120,13 +121,21 @@ async function prompt(rl: ReturnType<typeof createInterface>, q: string, def?: s
 // Install into every target, writing a .bak backup for each existing config.
 // Returns the list of targets actually written so the caller can report them.
 function installInto(picks: ClientTarget[]): ClientTarget[] {
+  const written: ClientTarget[] = [];
   for (const t of picks) {
-    const json = readJson(t.configPath);
+    let json: any;
+    try {
+      json = readJson(t.configPath);
+    } catch {
+      info(`Skipped ${t.label}: ${t.configPath} is not valid JSON. Fix it and re-run, or add the "${ENTRY_NAME}" entry manually.`);
+      continue;
+    }
     const updated = t.insert(json, ENTRY);
     writeJson(t.configPath, updated);
     ok(`Installed into ${c.bold}${t.label}${c.reset}`);
+    written.push(t);
   }
-  return picks;
+  return written;
 }
 
 // Printed at the end of every successful install — the curl one-liner lets
@@ -136,7 +145,8 @@ function printPostInstall(): void {
   section('Tools available after MCP client restart');
   tool('nitrograph_discover', 'Search the registry of agent-usable services');
   tool('nitrograph_service_detail', 'Full detail for a service (endpoints, schemas, health)');
-  tool('nitrograph_report_outcome', 'Report success/failure of an invocation');
+  tool('nitrograph_invoke_service', 'Invoke through Nitrograph with automatic outcome telemetry');
+  tool('nitrograph_report_outcome', 'Report success/failure of a direct invocation');
   tool('nitrograph_report_pattern', 'Report a working multi-step workflow');
 
   section('Query right now (no restart needed)');

@@ -7,11 +7,13 @@ import {
 import {
   discover,
   serviceDetail,
+  invokeService,
   reportOutcome,
   reportPattern,
   isPaymentRequired,
   isApiError,
 } from './api.js';
+import { pkgVersion } from './version.js';
 
 const TOOLS = [
   {
@@ -65,7 +67,7 @@ const TOOLS = [
   {
     name: 'nitrograph_service_detail',
     description:
-      'Use this after nitrograph_discover whenever the user wants to inspect, compare deeply, implement against, or call a selected API/service. Fetch full detail for a selected service by slug. Include task when you know the user task so call_card can rank endpoints and return a recommended_endpoint. Returns a call_card: the agent-readable invocation plan with endpoint options, request schemas, cost/payment handling, 402 interpretation, gotchas, proven patterns, and outcome-reporting policy. Use call_card as the primary guide for invoking; OpenAPI remains the schema source of truth.',
+      'Use this after nitrograph_discover whenever the user wants to inspect, compare deeply, implement against, or call a selected API/service. Fetch full detail for a selected service by slug. Include task when you know the user task so call_card can rank routes and return ranked route_cards plus a recommended_endpoint. Returns a call_card: the agent-readable invocation plan with endpoint options, route_cards, gotcha_card, request schemas, cost/payment handling, 402 interpretation, proven patterns, and outcome-reporting policy. Use route_cards and gotcha_card as the primary guide for invoking; OpenAPI remains the schema source of truth.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -76,9 +78,48 @@ const TOOLS = [
     },
   },
   {
+    name: 'nitrograph_invoke_service',
+    description:
+      'Invoke a selected service through Nitrograph using its stored call recipe. Nitrograph automatically captures status, latency, endpoint, payment state, and network error class as outcome metadata; no separate nitrograph_report_outcome call is needed. A 402 payment challenge is returned to the caller and treated as neutral, not as a service failure. Do not send long-lived provider secrets through hosted MCP; for secret-authenticated providers, instrument direct calls locally and use nitrograph_report_outcome after the provider runs.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Service slug as returned by nitrograph_discover.' },
+        endpoint_index: { type: 'number', description: 'Optional endpoint option index from service_detail.endpoints. Defaults to the primary call recipe.' },
+        query: {
+          type: 'object',
+          description: 'Optional query parameters to merge into the stored call recipe.',
+          additionalProperties: true,
+        },
+        body: {
+          anyOf: [
+            { type: 'object', additionalProperties: true },
+            { type: 'array' },
+            { type: 'string' },
+            { type: 'number' },
+            { type: 'boolean' },
+          ],
+          description: 'Optional request body to send instead of the stored example body. Pass JSON as a real object or array, not a JSON-encoded string; a string containing JSON is parsed before forwarding.',
+        },
+        body_type: {
+          type: 'string',
+          enum: ['json', 'form-data', 'text'],
+          description: 'Optional body encoding. Defaults to the stored recipe body type.',
+        },
+        headers: {
+          type: 'object',
+          description: 'Optional per-call headers. Hop-by-hop headers are stripped.',
+          additionalProperties: { type: 'string' },
+        },
+        timeout_ms: { type: 'number', description: 'Optional provider call timeout in milliseconds, max 60000.' },
+      },
+      required: ['slug'],
+    },
+  },
+  {
     name: 'nitrograph_report_outcome',
     description:
-      'Report the outcome of a paid/service call after it actually ran. Do NOT report 402 Payment Required, payment challenge, insufficient balance, or missing payment as a service failure; surface payment instructions to the user and wait until payment is complete. Outcomes feed trust_boost, so only real provider successes/failures should be reported. On genuine failure, include a diagnosis and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent.',
+      'Optionally report the outcome of a direct paid/service call after it actually ran. Skip this when the call was made through nitrograph_invoke_service because Nitrograph captures outcome metadata automatically. Do NOT report 402 Payment Required, payment challenge, insufficient balance, or missing payment as a service failure; surface payment instructions to the user and wait until payment is complete. Outcomes feed trust_boost, so only real provider successes/failures should be reported. On genuine failure, include a diagnosis and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -159,7 +200,7 @@ function displayResult(obj: any) {
 
 export async function startServer(): Promise<void> {
   const server = new Server(
-    { name: 'nitrograph', version: '0.5.1' },
+    { name: 'nitrograph', version: pkgVersion() },
     { capabilities: { tools: {} } },
   );
 
@@ -180,6 +221,12 @@ export async function startServer(): Promise<void> {
       }
       const task = typeof (args as any).task === 'string' ? (args as any).task : undefined;
       result = await serviceDetail(slug, task);
+    } else if (name === 'nitrograph_invoke_service') {
+      const slug = (args as any).slug;
+      if (typeof slug !== 'string' || !slug) {
+        return textResult('Error: slug is required');
+      }
+      result = await invokeService(args as any);
     } else if (name === 'nitrograph_report_outcome') {
       result = await reportOutcome(args as any);
     } else if (name === 'nitrograph_report_pattern') {

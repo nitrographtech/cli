@@ -27,6 +27,7 @@ export type {
   DiscoverResponse,
   DiscoveredService,
   ServiceDetail,
+  InvokeServiceInput,
   ReportOutcomeInput,
   ReportPatternInput,
   PatternStep,

@@ -1,4 +1,5 @@
 import { loadConfig } from './config.js';
+import { pkgVersion } from './version.js';
 
 export interface PaymentRequired {
   payment_required: true;
@@ -22,13 +23,15 @@ function baseUrl(): string {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
   const url = `${baseUrl()}${path}`;
+  const sessionToken = process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
   let res: Response;
   try {
     res = await fetch(url, {
       ...init,
       headers: {
         'content-type': 'application/json',
-        'user-agent': 'nitrograph-cli/0.2.0',
+        'user-agent': `nitrograph-cli/${pkgVersion()}`,
+        ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {}),
         ...(init.headers ?? {}),
       },
     });
@@ -95,6 +98,46 @@ export function serviceDetail(slug: string, task?: string): Promise<ApiResult<Re
   return request<Record<string, unknown>>(`/v1/service/${encodeURIComponent(slug)}${qs}`, {
     method: 'GET',
   });
+}
+
+// MCP hosts frequently serialize the invoke `body` argument as a JSON string
+// even when the schema asks for an object. Forwarding that string verbatim
+// gets stringified again at the proxy, so the provider receives double-encoded
+// JSON and rejects the call. Parse it back when the body is meant to be JSON.
+export function normalizeJsonBody(body: unknown, bodyType?: string): unknown {
+  if (typeof body !== 'string') return body;
+  if (bodyType != null && bodyType !== 'json') return body;
+  const trimmed = body.trim();
+  if (!/^[[{"]/.test(trimmed) && trimmed !== 'true' && trimmed !== 'false' && trimmed !== 'null' && !/^-?\d/.test(trimmed)) {
+    return body;
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return body;
+  }
+}
+
+export interface InvokeServiceInput {
+  slug: string;
+  endpoint_index?: number;
+  query?: Record<string, unknown>;
+  body?: unknown;
+  body_type?: 'json' | 'form-data' | 'text';
+  headers?: Record<string, string>;
+  timeout_ms?: number;
+}
+
+export function invokeService(input: InvokeServiceInput): Promise<ApiResult<Record<string, unknown>>> {
+  const { slug, ...rest } = input;
+  const body = {
+    ...rest,
+    ...(rest.body !== undefined ? { body: normalizeJsonBody(rest.body, rest.body_type) } : {}),
+  };
+  return request<Record<string, unknown>>(
+    `/v1/service/${encodeURIComponent(slug)}/invoke`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
 }
 
 export interface ReportOutcomeInput {

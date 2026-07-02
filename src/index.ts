@@ -1,19 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import { startServer } from './server.js';
 import { runWizard } from './install.js';
-
-function pkgVersion(): string {
-  try {
-    const here = dirname(fileURLToPath(import.meta.url));
-    const pkg = JSON.parse(readFileSync(join(here, '..', 'package.json'), 'utf8'));
-    return pkg.version ?? '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
-}
+import { pkgVersion } from './version.js';
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -52,7 +40,8 @@ call an API/service for a task. Prefer the hosted MCP server when supported:
 Tools exposed by the MCP server:
   nitrograph_discover          Search and rank APIs/services for a task
   nitrograph_service_detail    Fetch call cards, schemas, pricing, gotchas
-  nitrograph_report_outcome    Record success/failure of an invocation
+  nitrograph_invoke_service    Invoke through Nitrograph with automatic outcome telemetry
+  nitrograph_report_outcome    Record success/failure of a direct invocation
   nitrograph_report_pattern    Record a reusable successful workflow
 
 Config: ~/.config/nitrograph/config.json

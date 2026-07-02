@@ -87,6 +87,19 @@ export interface ReportOutcomeInput {
   suggestedFix?: string;
 }
 
+export interface InvokeServiceInput {
+  slug: string;
+  endpointIndex?: number;
+  endpoint_index?: number;
+  query?: Record<string, unknown>;
+  body?: unknown;
+  bodyType?: 'json' | 'form-data' | 'text';
+  body_type?: 'json' | 'form-data' | 'text';
+  headers?: Record<string, string>;
+  timeoutMs?: number;
+  timeout_ms?: number;
+}
+
 export interface PatternStep {
   step: number;
   endpoint: string;
@@ -157,7 +170,7 @@ export class Nitrograph {
 
   constructor(opts: NitrographOptions = {}) {
     this.apiUrl = (opts.apiUrl ?? process.env.NITROGRAPH_API_URL ?? DEFAULT_API_URL).replace(/\/+$/, '');
-    this.sessionToken = opts.sessionToken ?? process.env.NITROGRAPH_SESSION_TOKEN;
+    this.sessionToken = opts.sessionToken ?? process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.userAgent = opts.userAgent ?? `nitrograph-harness/${LIB_VERSION}`;
     this.fetchImpl = opts.fetch ?? fetch;
@@ -179,6 +192,20 @@ export class Nitrograph {
     const task = typeof opts === 'string' ? opts : opts.task;
     const qs = task && task.trim() !== '' ? `?task=${encodeURIComponent(task.trim())}` : '';
     return this.request<ServiceDetail>('GET', `/v1/service/${encodeURIComponent(slug)}${qs}`);
+  }
+
+  async invokeService(input: InvokeServiceInput): Promise<unknown> {
+    const { slug, endpointIndex, bodyType, timeoutMs, ...rest } = input;
+    if (!slug) throw new NitrographError('slug is required');
+    const effectiveBodyType = bodyType ?? rest.body_type;
+    const body = {
+      ...rest,
+      ...(rest.body !== undefined ? { body: normalizeJsonBody(rest.body, effectiveBodyType) } : {}),
+      ...(endpointIndex != null ? { endpoint_index: endpointIndex } : {}),
+      ...(bodyType != null ? { body_type: bodyType } : {}),
+      ...(timeoutMs != null ? { timeout_ms: timeoutMs } : {}),
+    };
+    return this.request('POST', `/v1/service/${encodeURIComponent(slug)}/invoke`, body);
   }
 
   async reportOutcome(input: ReportOutcomeInput): Promise<unknown> {
@@ -326,6 +353,25 @@ export class Nitrograph {
   }
 }
 
+// MCP hosts and loosely-typed callers often hand over the invoke body as a
+// JSON string. Forwarded verbatim it gets stringified again at the proxy and
+// the provider receives double-encoded JSON — parse it back when the body is
+// meant to be JSON. (Duplicated from api.ts: the library tree must not import
+// the CLI tree.)
+function normalizeJsonBody(body: unknown, bodyType?: string): unknown {
+  if (typeof body !== 'string') return body;
+  if (bodyType != null && bodyType !== 'json') return body;
+  const trimmed = body.trim();
+  if (!/^[[{"]/.test(trimmed) && trimmed !== 'true' && trimmed !== 'false' && trimmed !== 'null' && !/^-?\d/.test(trimmed)) {
+    return body;
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return body;
+  }
+}
+
 /**
  * Convenience factory so callers can `createNitrograph()` instead of `new Nitrograph()`.
  */
@@ -337,4 +383,4 @@ export function createNitrograph(opts: NitrographOptions = {}): Nitrograph {
 // bumping version in package.json does not require touching this file.
 // (The CLI reads the same file from disk — here we inline a literal because
 // library consumers may be bundling and we can't assume fs access.)
-const LIB_VERSION = '0.5.1';
+const LIB_VERSION = '0.5.8';
