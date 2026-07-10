@@ -15,7 +15,7 @@ import {
 } from './api.js';
 import { pkgVersion } from './version.js';
 
-const TOOLS = [
+export const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
