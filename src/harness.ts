@@ -27,6 +27,7 @@ export interface DiscoverFilters {
 export interface DiscoverInput {
   query: string;
   limit?: number;
+  offset?: number;
   filters?: DiscoverFilters;
 }
 
@@ -55,6 +56,9 @@ export interface DiscoverResponse {
   total_results: number;
   recommended_count?: number;
   related_count?: number;
+  limit?: number;
+  offset?: number;
+  has_more?: boolean;
   weak_matches_available?: boolean;
   display?: string;
   [key: string]: unknown;
@@ -176,11 +180,12 @@ export class Nitrograph {
     this.fetchImpl = opts.fetch ?? fetch;
   }
 
-  async discover(input: DiscoverInput | string, filtersOrOpts?: { limit?: number } & DiscoverFilters): Promise<DiscoverResponse> {
+  async discover(input: DiscoverInput | string, filtersOrOpts?: { limit?: number; offset?: number } & DiscoverFilters): Promise<DiscoverResponse> {
     const payload: DiscoverInput = typeof input === 'string'
       ? {
           query: input,
           ...(filtersOrOpts?.limit != null ? { limit: filtersOrOpts.limit } : {}),
+          ...(filtersOrOpts?.offset != null ? { offset: filtersOrOpts.offset } : {}),
           ...(this.pickFilters(filtersOrOpts) ? { filters: this.pickFilters(filtersOrOpts)! } : {}),
         }
       : input;
@@ -240,6 +245,11 @@ export class Nitrograph {
   /** Remaining quota/balance for the current caller. Does not consume a call. */
   async sessionStatus(): Promise<Record<string, unknown>> {
     return this.request<Record<string, unknown>>('GET', '/v1/session');
+  }
+
+  /** Valid filters.category values with counts, so callers don't guess. */
+  async categories(): Promise<{ categories: Array<{ category: string; count: number }> }> {
+    return this.request('GET', '/v1/categories');
   }
 
   private pickFilters(o: ({ limit?: number } & DiscoverFilters) | undefined): DiscoverFilters | null {
@@ -388,4 +398,4 @@ export function createNitrograph(opts: NitrographOptions = {}): Nitrograph {
 // bumping version in package.json does not require touching this file.
 // (The CLI reads the same file from disk — here we inline a literal because
 // library consumers may be bundling and we can't assume fs access.)
-const LIB_VERSION = '0.5.12';
+const LIB_VERSION = '0.5.13';
