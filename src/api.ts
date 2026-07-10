@@ -17,17 +17,36 @@ export interface ApiError {
 
 export type ApiResult<T> = T | PaymentRequired | ApiError;
 
+// Default client-side timeout for a call to api.nitrograph.com. Without one an
+// agent's MCP tool call hangs indefinitely if the API stalls. Overridable per
+// request (invoke needs a longer ceiling, see requestTimeoutFor) and globally
+// via NITROGRAPH_TIMEOUT_MS.
+const DEFAULT_TIMEOUT_MS = 30_000;
+
 function baseUrl(): string {
   return process.env.NITROGRAPH_API_URL ?? loadConfig().api_url;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
+function defaultTimeoutMs(): number {
+  const raw = Number(process.env.NITROGRAPH_TIMEOUT_MS);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_TIMEOUT_MS;
+}
+
+async function request<T>(
+  path: string,
+  init: RequestInit = {},
+  opts: { timeoutMs?: number } = {},
+): Promise<ApiResult<T>> {
   const url = `${baseUrl()}${path}`;
   const sessionToken = process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
+  const timeoutMs = opts.timeoutMs ?? defaultTimeoutMs();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let res: Response;
   try {
     res = await fetch(url, {
       ...init,
+      signal: controller.signal,
       headers: {
         'content-type': 'application/json',
         'user-agent': `nitrograph-cli/${pkgVersion()}`,
@@ -36,7 +55,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiResu
       },
     });
   } catch (err: any) {
-    return { error: true, status: 0, message: `network error: ${err?.message ?? err}` };
+    const isAbort = err?.name === 'AbortError';
+    return {
+      error: true,
+      status: 0,
+      message: isAbort
+        ? `request timed out after ${timeoutMs}ms`
+        : `network error: ${err?.message ?? err}`,
+    };
+  } finally {
+    clearTimeout(timer);
   }
 
   const text = await res.text();
@@ -134,9 +162,15 @@ export function invokeService(input: InvokeServiceInput): Promise<ApiResult<Reco
     ...rest,
     ...(rest.body !== undefined ? { body: normalizeJsonBody(rest.body, rest.body_type) } : {}),
   };
+  // Invoke proxies a live provider call whose server-side ceiling is 60s. The
+  // client timeout must clear that plus network overhead, or a legitimately
+  // slow provider call would be aborted here before the server responds.
+  const providerTimeout = Number.isFinite(rest.timeout_ms as number) ? Number(rest.timeout_ms) : 60_000;
+  const timeoutMs = Math.min(providerTimeout, 60_000) + 10_000;
   return request<Record<string, unknown>>(
     `/v1/service/${encodeURIComponent(slug)}/invoke`,
     { method: 'POST', body: JSON.stringify(body) },
+    { timeoutMs },
   );
 }
 
