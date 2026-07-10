@@ -10,6 +10,7 @@
     { "name": "nitrograph_service_detail", "required": ["slug"] },
     { "name": "nitrograph_invoke_service", "required": ["slug"] },
     { "name": "nitrograph_report_outcome", "required": ["slug", "success"] },
-    { "name": "nitrograph_report_pattern", "required": ["slug", "task", "steps", "success"] }
+    { "name": "nitrograph_report_pattern", "required": ["slug", "task", "steps", "success"] },
+    { "name": "nitrograph_session_status", "required": [] }
   ]
 }

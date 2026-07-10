@@ -10,6 +10,7 @@ import {
   invokeService,
   reportOutcome,
   reportPattern,
+  sessionStatus,
   isPaymentRequired,
   isApiError,
 } from './api.js';
@@ -156,6 +157,16 @@ export const TOOLS = [
       required: ['slug', 'task', 'steps', 'success'],
     },
   },
+  {
+    name: 'nitrograph_session_status',
+    description:
+      'Check remaining Nitrograph quota/balance WITHOUT consuming a call. Returns queries_remaining plus plan ("free" IP tier or "paid" session); paid sessions also return wallet and expires_at. Use it to budget before a batch of discover/service_detail/invoke calls, or to confirm a payment landed. A free-tier caller sees calls left in the current hour window; a paid caller (session token) sees remaining balance.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 function textResult(text: string) {
@@ -216,6 +227,8 @@ export async function startServer(): Promise<void> {
       result = await reportOutcome(args as any);
     } else if (name === 'nitrograph_report_pattern') {
       result = await reportPattern(args as any);
+    } else if (name === 'nitrograph_session_status') {
+      result = await sessionStatus();
     } else {
       return textResult(`Unknown tool: ${name}`);
     }

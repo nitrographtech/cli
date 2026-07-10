@@ -209,6 +209,10 @@ export function reportPattern(input: ReportPatternInput): Promise<ApiResult<Reco
   );
 }
 
+export function sessionStatus(): Promise<ApiResult<Record<string, unknown>>> {
+  return request<Record<string, unknown>>('/v1/session', { method: 'GET' });
+}
+
 export function isPaymentRequired(r: ApiResult<unknown>): r is PaymentRequired {
   return typeof r === 'object' && r !== null && (r as any).payment_required === true;
 }

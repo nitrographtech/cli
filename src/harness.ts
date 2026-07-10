@@ -237,6 +237,11 @@ export class Nitrograph {
     );
   }
 
+  /** Remaining quota/balance for the current caller. Does not consume a call. */
+  async sessionStatus(): Promise<Record<string, unknown>> {
+    return this.request<Record<string, unknown>>('GET', '/v1/session');
+  }
+
   private pickFilters(o: ({ limit?: number } & DiscoverFilters) | undefined): DiscoverFilters | null {
     if (!o) return null;
     const { rail, max_cost, min_trust, category } = o;
@@ -383,4 +388,4 @@ export function createNitrograph(opts: NitrographOptions = {}): Nitrograph {
 // bumping version in package.json does not require touching this file.
 // (The CLI reads the same file from disk — here we inline a literal because
 // library consumers may be bundling and we can't assume fs access.)
-const LIB_VERSION = '0.5.11';
+const LIB_VERSION = '0.5.12';

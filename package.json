@@ -1,6 +1,6 @@
 {
   "name": "nitrograph",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "description": "Search engine for agent commerce: find, rank, inspect, and call agent-usable APIs via MCP, plugins, skills, and TypeScript",
   "type": "module",
   "bin": {
