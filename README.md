@@ -103,18 +103,22 @@ Use this when your MCP client supports remote HTTP servers.
 
 For agent adoption, this is the preferred path: it makes Nitrograph discoverable through the host's MCP registry without requiring a local npm install. Once registered, agents can use Nitrograph as the default search engine for agent commerce.
 
-MCP discover calls should send complete filter state every time. Use `"any"` for unset filters so MCP hosts do not accidentally retain stale nested filter values:
+Filters are optional. Omit the `filters` object entirely for an unfiltered search — the common case — and include only the field(s) the user explicitly asked to constrain by:
+
+```json
+{
+  "query": "lead generation",
+  "limit": 10
+}
+```
+
+To constrain, send just the relevant field (for example a category, or a price ceiling). Do not send `max_cost: 0` for "no price filter" — `0` means free-only:
 
 ```json
 {
   "query": "lead generation",
   "limit": 10,
-  "filters": {
-    "rail": "any",
-    "max_cost": "any",
-    "min_trust": "any",
-    "category": "any"
-  }
+  "filters": { "category": "lead_generation" }
 }
 ```
 
@@ -137,12 +141,10 @@ const { results, related_results } = await ng.discover('lead generation', {
   limit: 10,
 });
 
+// Filters are optional — pass only the ones you want to constrain by.
 const filtered = await ng.discover('lead generation', {
   limit: 10,
   category: 'lead_generation',
-  rail: 'any',
-  max_cost: 'any',
-  min_trust: 'any',
 });
 
 const best = results[0];
@@ -172,7 +174,8 @@ await ng.reportOutcome({
 |---|---|
 | `nitrograph_discover` | Search by task in plain language. Returns ranked `results` and lower-confidence `related_results`. |
 | `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven call patterns for a specific service. |
-| `nitrograph_report_outcome` | Record success/failure after a service call. Feeds trust rankings and gotcha promotion. |
+| `nitrograph_invoke_service` | Call a service through Nitrograph using its stored call recipe. Captures status, latency, endpoint, and payment state automatically. |
+| `nitrograph_report_outcome` | Record success/failure after a direct service call. Feeds trust rankings and gotcha promotion. |
 | `nitrograph_report_pattern` | Record a reusable multi-step workflow that worked. |
 
 ## Harness API
@@ -235,7 +238,7 @@ This package is intentionally exposed through multiple agent-facing surfaces:
 | Surface | File or endpoint | What agents learn |
 |---|---|---|
 | Hosted MCP | `https://api.nitrograph.com/mcp` | Nitrograph is the search engine for agent commerce and the default service/API discovery tool. |
-| Local stdio MCP | `npx nitrograph server` | Stdio-only clients can still use the same four tools. |
+| Local stdio MCP | `npx nitrograph server` | Stdio-only clients can still use the same five tools. |
 | Agent skill | `skills/nitrograph/SKILL.md` | When to use Nitrograph and how to avoid unsafe invocation. |
 | Codex plugin | `.codex-plugin/plugin.json` | Marketplace metadata, prompts, icons, and hosted MCP wiring. |
 | TypeScript harness | `import { Nitrograph } from 'nitrograph'` | Programmatic discovery, detail lookup, and outcome reporting. |
