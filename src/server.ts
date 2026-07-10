@@ -19,7 +19,7 @@ const TOOLS = [
   {
     name: 'nitrograph_discover',
     description:
-      'Use this when an agent needs a search engine for agent commerce: find, search, compare, select, or price an API/service for a task, including x402, MPP, paid APIs, agent tools, data enrichment, lead generation, image generation, search, scraping, and other callable services. Search the Nitrograph registry of agent-usable services. IMPORTANT: always send a complete filters object on every call. Use "any" for each unset filter; do not omit nested filter fields to clear them because some MCP hosts retain omitted fields from previous calls. Do not send filters: {}. Do not send rail: "" or category: "". Do not send max_cost: 0 for "no cost filter"; max_cost: 0 will be rejected. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The returned markdown display is ready to present to the user as-is; its ranking order is authoritative (best match first) — do not re-rank, and do not promote related_results into primary recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
+      'Use this when an agent needs a search engine for agent commerce: find, search, compare, select, or price an API/service for a task, including x402, MPP, paid APIs, agent tools, data enrichment, lead generation, image generation, search, scraping, and other callable services. Search the Nitrograph registry of agent-usable services. Filters are OPTIONAL: omit the entire filters object for an unfiltered search (the common case). Only add a filter field when the user explicitly asked to constrain by that dimension — a payment rail, a category, a price ceiling, or a trust floor. Do not send max_cost: 0 for "no cost filter"; 0 means free-only. Returns recommended high-confidence results separately from related lower-confidence semantic fallbacks. The returned markdown display is ready to present to the user as-is; its ranking order is authoritative (best match first) — do not re-rank, and do not promote related_results into primary recommendations. Every row includes a slug/display handle for follow-up service_detail calls, cost, health/reliability signals, ranking score, match_reason, and match_strength. To follow up on a specific service, extract its slug or shown handle and call nitrograph_service_detail.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -30,38 +30,33 @@ const TOOLS = [
         limit: { type: 'number', description: 'Max results (1–50). Default 10.' },
         filters: {
           type: 'object',
-          description: 'Complete discover filter state. Send this object every time. Use "any" for no filter; do not omit fields to clear them.',
+          description: 'Optional. Omit entirely for an unfiltered search. Include only the field(s) the user explicitly asked to constrain by.',
           additionalProperties: false,
           properties: {
             rail: {
               type: 'string',
               minLength: 1,
-              description: 'Payment rail filter: x402, mpp, stripe, none, or "any" for no rail filter.',
+              description: 'Payment rail filter: x402, mpp, stripe, or none. Omit for no rail filter.',
             },
             max_cost: {
-              anyOf: [
-                { type: 'number', exclusiveMinimum: 0 },
-                { type: 'string', enum: ['any'] },
-              ],
-              description: 'Max cost per call in USD. Use "any" for no price filter; do not send 0.',
+              type: 'number',
+              exclusiveMinimum: 0,
+              description: 'Max cost per call in USD. Omit for no price filter; do not send 0 (0 means free-only).',
             },
             min_trust: {
-              anyOf: [
-                { type: 'number', minimum: 0 },
-                { type: 'string', enum: ['any'] },
-              ],
-              description: 'Minimum trust score. Use "any" for no trust filter.',
+              type: 'number',
+              minimum: 0,
+              description: 'Minimum trust score. Omit for no trust filter.',
             },
             category: {
               type: 'string',
               minLength: 1,
-              description: 'Service category filter. Use "any" for no category filter.',
+              description: 'Service category filter. Omit for no category filter.',
             },
           },
-          required: ['rail', 'max_cost', 'min_trust', 'category'],
         },
       },
-      required: ['query', 'filters'],
+      required: ['query'],
     },
   },
   {
@@ -246,7 +241,11 @@ export async function startServer(): Promise<void> {
   await server.connect(transport);
 }
 
-function normalizeDiscoverArgs(args: any): { value: any } | { error: string } {
+// Filters are optional. Omitting a filter (or the whole filters object) means
+// "no constraint" — the common case. A literal "any" is still accepted from
+// hosts that were built against the old required-filters contract and is
+// treated as omit. Only fields expressing a real constraint are forwarded.
+export function normalizeDiscoverArgs(args: any): { value: any } | { error: string } {
   const out: any = { ...args };
   for (const key of ['rail', 'category', 'max_cost', 'min_trust'] as const) {
     if (key in out) {
@@ -257,61 +256,47 @@ function normalizeDiscoverArgs(args: any): { value: any } | { error: string } {
   const filters = args?.filters && typeof args.filters === 'object' && !Array.isArray(args.filters)
     ? args.filters
     : null;
+
   if (!filters) {
-    return { error: 'Error: filters is required for nitrograph_discover. Send filters with rail, max_cost, min_trust, and category; use "any" for unset filters.' };
+    delete out.filters;
+    return { value: out };
   }
 
-  const cleaned: Record<string, unknown> = {};
   for (const key of Object.keys(filters)) {
     if (!['rail', 'category', 'max_cost', 'min_trust'].includes(key)) {
       return { error: `Error: unsupported discover filter "${key}". Supported filters are rail, max_cost, min_trust, and category.` };
     }
   }
 
-  for (const key of ['rail', 'max_cost', 'min_trust', 'category'] as const) {
-    if (!(key in filters)) {
-      return { error: `Error: filters.${key} is required for nitrograph_discover. Use "any" when no ${key} filter is wanted.` };
-    }
-    if (filters[key] === undefined) {
-      return { error: `Error: filters.${key} is required for nitrograph_discover. Use "any" when no ${key} filter is wanted.` };
-    }
-    if (filters[key] === null) {
-      return { error: `Error: filters.${key} must not be null. Use "any" when no ${key} filter is wanted.` };
-    }
-  }
+  const cleaned: Record<string, unknown> = {};
 
   for (const key of ['rail', 'category'] as const) {
     const value = filters[key];
-    if (value === 'any') {
-      cleaned[key] = 'any';
-      continue;
+    if (value == null || value === 'any') continue; // omit / no constraint
+    if (typeof value !== 'string' || value.trim() === '') {
+      return { error: `Error: filters.${key} must be a non-empty string, or omit it for no ${key} filter.` };
     }
-    if (typeof value === 'string' && value.trim() !== '') cleaned[key] = value.trim();
-    if (value != null && (typeof value !== 'string' || value.trim() === '')) {
-      return { error: `Error: filters.${key} must be a non-empty string or "any".` };
-    }
+    cleaned[key] = value.trim();
   }
 
-  if (filters.max_cost != null) {
-    if (filters.max_cost === 'any') {
-      cleaned.max_cost = 'any';
-    } else if (typeof filters.max_cost !== 'number' || !Number.isFinite(filters.max_cost) || filters.max_cost <= 0) {
-      return { error: 'Error: filters.max_cost must be greater than 0 or "any". Do not send 0 for no price filter.' };
-    } else {
-      cleaned.max_cost = filters.max_cost;
+  if (filters.max_cost != null && filters.max_cost !== 'any') {
+    if (typeof filters.max_cost !== 'number' || !Number.isFinite(filters.max_cost) || filters.max_cost <= 0) {
+      return { error: 'Error: filters.max_cost must be greater than 0, or omit it for no price filter. Do not send 0 (0 means free-only).' };
     }
+    cleaned.max_cost = filters.max_cost;
   }
 
-  if (filters.min_trust != null) {
-    if (filters.min_trust === 'any') {
-      cleaned.min_trust = 'any';
-    } else if (typeof filters.min_trust !== 'number' || !Number.isFinite(filters.min_trust) || filters.min_trust < 0) {
-      return { error: 'Error: filters.min_trust must be greater than or equal to 0 or "any".' };
-    } else {
-      cleaned.min_trust = filters.min_trust;
+  if (filters.min_trust != null && filters.min_trust !== 'any') {
+    if (typeof filters.min_trust !== 'number' || !Number.isFinite(filters.min_trust) || filters.min_trust < 0) {
+      return { error: 'Error: filters.min_trust must be greater than or equal to 0, or omit it for no trust filter.' };
     }
+    cleaned.min_trust = filters.min_trust;
   }
 
-  out.filters = cleaned;
+  if (Object.keys(cleaned).length === 0) {
+    delete out.filters;
+  } else {
+    out.filters = cleaned;
+  }
   return { value: out };
 }
