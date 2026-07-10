@@ -29,6 +29,7 @@ export const TOOLS = [
           description: 'Natural language description of the capability needed (e.g. "text-to-speech with SSML support").',
         },
         limit: { type: 'number', description: 'Max results (1–50). Default 10.' },
+        offset: { type: 'number', description: 'Optional. Skip this many ranked results for pagination ("show me more"). Default 0. Response includes has_more.' },
         filters: {
           type: 'object',
           description: 'Optional. Omit entirely for an unfiltered search. Include only the field(s) the user explicitly asked to constrain by.',

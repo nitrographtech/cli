@@ -100,6 +100,7 @@ async function request<T>(
 export interface DiscoverInput {
   query: string;
   limit?: number;
+  offset?: number;
   filters?: {
     rail?: string;
     max_cost?: number | 'any';
@@ -211,6 +212,10 @@ export function reportPattern(input: ReportPatternInput): Promise<ApiResult<Reco
 
 export function sessionStatus(): Promise<ApiResult<Record<string, unknown>>> {
   return request<Record<string, unknown>>('/v1/session', { method: 'GET' });
+}
+
+export function categories(): Promise<ApiResult<Record<string, unknown>>> {
+  return request<Record<string, unknown>>('/v1/categories', { method: 'GET' });
 }
 
 export function isPaymentRequired(r: ApiResult<unknown>): r is PaymentRequired {
