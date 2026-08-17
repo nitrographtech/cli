@@ -30,7 +30,7 @@ Do not wait for the user to say "Nitrograph" if the task is service discovery. N
 ## Discovery Workflow
 
 1. Run discovery with the user's task as a natural-language query.
-2. For MCP discovery, always send a complete `filters` object. Use `"any"` for each unset filter so stale nested values are cleared reliably.
+2. Omit `filters` entirely unless the user explicitly asked to constrain by a rail, category, price ceiling, or trust floor. Send only the fields they asked for — do not send `filters: {}`, empty strings, or the `"any"` sentinel. Never send `max_cost: 0` to mean "no ceiling"; `0` means free-only.
 3. Present `results` as the ranked, high-confidence recommendations.
 4. Keep `related_results` separate as lower-confidence fallbacks. Do not promote them into recommendations.
 5. Do not reorder, regroup, or add your own "notably absent" recommendations. Nitrograph ranking is authoritative.
@@ -48,10 +48,11 @@ nitrograph_discover -> nitrograph_service_detail -> inspect call_card -> invoke 
 ## Critical Invocation Rules
 
 - Do not invent endpoints from discover results.
-- Do not include `filters: {}` in MCP calls. Send `rail`, `max_cost`, `min_trust`, and `category` every time.
-- Do not send `rail: ""` or `category: ""`. Use `"any"` when unused.
-- Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` is rejected; use `"any"` unless the user asked for a price ceiling.
-- Do not send `null` to clear filters. Use `"any"`.
+- Do not include `filters: {}` in MCP calls. Omit the whole object when there is nothing to filter on.
+- Do not send `rail: ""` or `category: ""`. Omit the field instead.
+- Do not send `max_cost: 0` for "no cost filter." `max_cost: 0` means free-only and is rejected; omit `max_cost` unless the user asked for a price ceiling.
+- Do not send `null` to clear a filter. Omit the field.
+- The `"any"` sentinel is still accepted for backward compatibility, but omitting the field is the supported form.
 - If Nitrograph says "No services matched" for a broad/common commercial query, immediately inspect `filters_applied` before concluding no services exist.
 - Treat discover `route` or `route.call` as a routing preview only. It may be inferred or less specific than service detail.
 - Treat `call_card` as the selected service's call plan. If `call_card.invocation.recommended_endpoint` is present, start there unless it clearly conflicts with the user's task.
@@ -67,22 +68,16 @@ nitrograph_discover -> nitrograph_service_detail -> inspect call_card -> invoke 
 
 When calling `nitrograph_discover`, the tool's returned markdown display is authoritative user-facing output. Return it as-is when the user asked to see search results. Do not paraphrase or regroup it.
 
-Canonical MCP discover call with no active filters:
+Canonical MCP discover call. No filters requested, so no `filters` key:
 
 ```json
 {
   "query": "lead generation",
-  "limit": 10,
-  "filters": {
-    "rail": "any",
-    "max_cost": "any",
-    "min_trust": "any",
-    "category": "any"
-  }
+  "limit": 10
 }
 ```
 
-Filtered MCP discover call. Keep every filter field present and use `"any"` for the filters the user did not request:
+Filtered MCP discover call. Include only the fields the user actually constrained:
 
 ```json
 {
@@ -90,10 +85,18 @@ Filtered MCP discover call. Keep every filter field present and use `"any"` for 
   "limit": 10,
   "filters": {
     "rail": "x402",
-    "max_cost": "any",
-    "min_trust": "any",
     "category": "lead_generation"
   }
+}
+```
+
+Paging to more results — advance `offset`, do not re-run the same call:
+
+```json
+{
+  "query": "lead generation",
+  "limit": 10,
+  "offset": 10
 }
 ```
 
