@@ -254,6 +254,8 @@ This package is intentionally exposed through multiple agent-facing surfaces:
 }
 ```
 
+**With an account (recommended):** create an API key at nitrograph.com/dashboard and set `NITROGRAPH_API_KEY=ng_live_...` in the MCP server's environment — calls then run on your prepaid credits with signed receipts and per-key spend caps.
+
 The free tier requires no config and no API key. When the free tier is exhausted, Nitrograph returns a pay-to-continue URL; the returned session token can be passed as `NITROGRAPH_SESSION_TOKEN`.
 
 ## Links

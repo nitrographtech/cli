@@ -38,7 +38,11 @@ async function request<T>(
   opts: { timeoutMs?: number } = {},
 ): Promise<ApiResult<T>> {
   const url = `${baseUrl()}${path}`;
-  const sessionToken = process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
+  // Account credentials (dashboard-minted ng_live_ key or legacy scope JWT)
+  // take precedence over pay-to-continue session tokens: an account key
+  // means prepaid credits, receipts, and caps — the full product.
+  const apiKey = process.env.NITROGRAPH_API_KEY ?? process.env.NITROGRAPH_SCOPE_TOKEN;
+  const sessionToken = apiKey ?? process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
   const timeoutMs = opts.timeoutMs ?? defaultTimeoutMs();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
