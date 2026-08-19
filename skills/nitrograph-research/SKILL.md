@@ -1,6 +1,6 @@
 ---
 name: nitrograph-research
-description: Paid research and enrichment through Nitrograph with validation and refunds. Use when the user asks to enrich a company or person, research a topic, run a paid web search, or scrape a page — and wants a validated result they are only charged for if it passed. Requires a Nitrograph scope token.
+description: Paid research and enrichment through Nitrograph with validation and refunds. Use when the user asks to enrich a company or person, research a topic, run a paid web search, or scrape a page — and wants a validated result they are only charged for if it passed. Requires a Nitrograph API key (`NITROGRAPH_API_KEY`).
 ---
 
 # Nitrograph Research
@@ -12,7 +12,9 @@ refunded automatically and carry a signed receipt either way.
 
 ## Setup
 
-Requires a scope token in `NITROGRAPH_SCOPE_TOKEN` (issued from the account
+Requires an API key in `NITROGRAPH_API_KEY` (`ng_live_...`, created at
+https://nitrograph.com/login — free starter credits; `NITROGRAPH_API_KEY` (or legacy `NITROGRAPH_SCOPE_TOKEN`)
+is a legacy alias, issued from the account
 owner's dashboard or `POST /v1/agent-scopes`). Every request below sends it
 as `Authorization: Bearer <token>`. If it is missing, tell the user how to
 get one; do not fall back to unauthenticated endpoints for paid work.
