@@ -1,6 +1,12 @@
 import { loadConfig } from './config.js';
 import { pkgVersion } from './version.js';
 
+
+// `nitrograph login` stores a paired key in the CLI config; env always wins.
+function storedApiKey(): string | undefined {
+  try { return loadConfig().apiKey; } catch { return undefined; }
+}
+
 export interface PaymentRequired {
   payment_required: true;
   pay_at: string;
@@ -41,7 +47,7 @@ async function request<T>(
   // Account credentials (dashboard-minted ng_live_ key or legacy scope JWT)
   // take precedence over pay-to-continue session tokens: an account key
   // means prepaid credits, receipts, and caps — the full product.
-  const apiKey = process.env.NITROGRAPH_API_KEY ?? process.env.NITROGRAPH_SCOPE_TOKEN;
+  const apiKey = process.env.NITROGRAPH_API_KEY ?? process.env.NITROGRAPH_SCOPE_TOKEN ?? storedApiKey();
   const sessionToken = apiKey ?? process.env.NITROGRAPH_SESSION_TOKEN ?? process.env.NITRO_AGENT_CHECKOUT_TOKEN;
   const timeoutMs = opts.timeoutMs ?? defaultTimeoutMs();
   const controller = new AbortController();

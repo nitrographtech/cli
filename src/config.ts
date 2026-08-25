@@ -4,6 +4,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 
 export interface NitrographConfig {
   api_url: string;
+  /** Stored by `nitrograph login` (device pairing). */
+  apiKey?: string;
 }
 
 const DEFAULT_CONFIG: NitrographConfig = {

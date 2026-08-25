@@ -12,6 +12,18 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (cmd === 'login') {
+    const { runLogin } = await import('./login.js');
+    await runLogin();
+    return;
+  }
+
+  if (cmd === 'logout') {
+    const { runLogout } = await import('./login.js');
+    runLogout();
+    return;
+  }
+
   if (cmd === 'server' || cmd === 'serve') {
     await startServer();
     return;
@@ -30,6 +42,10 @@ Usage:
                              In a terminal → interactive wizard.
                              In an agent / CI / pipe → auto-installs into
                              every detected client with no prompts.
+  npx nitrograph login       Pair this machine: prints a code, you approve
+                             once at nitrograph.com/pair, the key is stored
+                             locally. First certified call is free.
+  npx nitrograph logout      Forget the stored key
   npx nitrograph server      Run the MCP server (stdio transport)
   npx nitrograph --version   Print version
 
