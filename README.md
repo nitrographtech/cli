@@ -254,7 +254,9 @@ This package is intentionally exposed through multiple agent-facing surfaces:
 }
 ```
 
-**With an account (recommended):** create an API key at nitrograph.com/dashboard and set `NITROGRAPH_API_KEY=ng_live_...` in the MCP server's environment — calls then run on your prepaid credits with signed receipts and per-key spend caps.
+**Fastest: let the agent pair itself.** With no key, the agent calls the `nitrograph_authenticate` tool (no arguments) or `POST /v1/auth/device/start`, hands you a short code and nitrograph.com/pair; you sign in and approve once (~30s, no card) and it receives its own spend-capped `ng_live_` key. Standard OAuth device-flow clients discover the same mint via `/.well-known/oauth-authorization-server`.
+
+**Manual:** create an API key at nitrograph.com/dashboard and set `NITROGRAPH_API_KEY=ng_live_...` in the MCP server's environment — calls then run on your prepaid credits with signed receipts and per-key spend caps. Keyless calls on certified services get 3 free managed tries a day.
 
 The free tier requires no config and no API key. When the free tier is exhausted, Nitrograph returns a pay-to-continue URL; the returned session token can be passed as `NITROGRAPH_SESSION_TOKEN`.
 
