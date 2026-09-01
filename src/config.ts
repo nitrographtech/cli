@@ -37,3 +37,11 @@ export function saveConfig(cfg: NitrographConfig): void {
   mkdirSync(dirname(p), { recursive: true });
   writeFileSync(p, JSON.stringify(cfg, null, 2) + '\n', { mode: 0o600 });
 }
+
+/** Persist a claimed/verified API key the same way `nitrograph login` does. */
+export function storeClaimedKey(apiKey: string): string {
+  const cfg = loadConfig();
+  cfg.apiKey = apiKey;
+  saveConfig(cfg);
+  return configPath();
+}

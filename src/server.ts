@@ -14,9 +14,30 @@ import {
   isPaymentRequired,
   isApiError,
 } from './api.js';
+import { authenticate } from './login.js';
 import { pkgVersion } from './version.js';
 
 export const TOOLS = [
+  {
+    name: 'nitrograph_authenticate',
+    description:
+      'Get authenticated. With api_key: verifies the key the user provided and reports the plan. With NO arguments: starts device pairing - you receive a short code and URL for your human to approve (sign-in takes ~30s, no card), then call this tool again with the returned device_token to poll; on approval you receive a spend-capped ng_live_ API key exactly once. Store it and pass it as api_key on every Nitrograph call.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        api_key: {
+          type: 'string',
+          description: 'Nitrograph API key (ng_live_...) if the user already has one',
+        },
+        device_token: {
+          type: 'string',
+          description: 'Poll an in-progress device pairing started by a previous no-argument call',
+        },
+      },
+      required: [],
+      additionalProperties: false,
+    },
+  },
   {
     name: 'nitrograph_discover',
     description:
@@ -207,7 +228,9 @@ export async function startServer(): Promise<void> {
     const { name, arguments: args = {} } = req.params;
 
     let result: unknown;
-    if (name === 'nitrograph_discover') {
+    if (name === 'nitrograph_authenticate') {
+      result = await authenticate(args as { api_key?: unknown; device_token?: unknown });
+    } else if (name === 'nitrograph_discover') {
       const normalized = normalizeDiscoverArgs(args as any);
       if ('error' in normalized) return textResult(normalized.error);
       result = await discover(normalized.value);
