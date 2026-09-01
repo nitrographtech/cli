@@ -1,0 +1,43 @@
+# Publish the public npm package `nitrograph` from a version tag only.
+# After merge, humans ship by tagging vX.Y.Z (must match package.json).
+# Never runs on push to main or on pull requests.
+#
+# Auth: GitHub Actions secret NPM_TOKEN (npm automation token), exposed to
+# npm via setup-node's NODE_AUTH_TOKEN. Do not commit a token or .npmrc.
+# Never `npm publish --force`. Never `npm unpublish`.
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Tag must match package.json version
+        run: |
+          set -euo pipefail
+          pkg="$(node -p "require('./package.json').version")"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$pkg" != "$tag" ]; then
+            echo "tag v${tag} != package.json ${pkg}"
+            exit 1
+          fi
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -6,7 +6,7 @@
 
 ![Nitrograph demo - an agent query becomes ranked paid API recommendations](assets/nitrograph-readme-demo.gif)
 
-**Your agent needs a service. Nitrograph is the search engine for agent commerce: it finds, ranks, and tells the agent how to call it.**
+**One API. 11,000+ services. Discover, rank, and call APIs from MCP, CLI, plugins, and TypeScript.**
 
 Nitrograph indexes agent-usable APIs across x402 and MPP, ranks them by task fit, health, trust, cost, and prior agent outcomes, then exposes the result through MCP, a TypeScript harness, and raw HTTP.
 
