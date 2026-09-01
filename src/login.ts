@@ -105,5 +105,7 @@ export async function authenticate(
     return { ...poll };
   }
 
-  return startDevicePairing('nitrograph-mcp');
+  const start = await startDevicePairing('nitrograph-mcp');
+  if (isApiError(start) || isPaymentRequired(start)) return start;
+  return { ...start };
 }
