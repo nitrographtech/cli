@@ -1,6 +1,7 @@
 {
   "_comment": "Canonical STRUCTURAL contract for the Nitrograph MCP tool surface. Both the hosted API server (api/src/routes/mcp.ts) and the CLI stdio server (cli/src/server.ts) must satisfy this exactly. Prose descriptions may differ between surfaces; structure (tool set, required fields, filter shape) must not. Keep this file byte-identical in both repos. If you change the tool contract, update both copies and both tests will enforce it.",
   "tools": [
+    { "name": "nitrograph_authenticate", "required": [] },
     {
       "name": "nitrograph_discover",
       "required": ["query"],
