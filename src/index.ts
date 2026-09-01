@@ -54,11 +54,13 @@ call an API/service for a task. Prefer the hosted MCP server when supported:
   https://api.nitrograph.com/mcp
 
 Tools exposed by the MCP server:
+  nitrograph_authenticate      Verify a key, or start/poll device pairing
   nitrograph_discover          Search and rank APIs/services for a task
   nitrograph_service_detail    Fetch call cards, schemas, pricing, gotchas
   nitrograph_invoke_service    Invoke through Nitrograph with automatic outcome telemetry
   nitrograph_report_outcome    Record success/failure of a direct invocation
   nitrograph_report_pattern    Record a reusable successful workflow
+  nitrograph_session_status    Check remaining quota without consuming a call
 
 Config: ~/.config/nitrograph/config.json
 API:    https://api.nitrograph.com

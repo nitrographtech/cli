@@ -224,6 +224,43 @@ export function sessionStatus(): Promise<ApiResult<Record<string, unknown>>> {
   return request<Record<string, unknown>>('/v1/session', { method: 'GET' });
 }
 
+export interface DeviceStartResult {
+  user_code: string;
+  verification_url: string;
+  device_token: string;
+  poll_interval_seconds: number;
+  expires_in_seconds: number;
+  instructions?: string;
+}
+
+export function startDevicePairing(label = 'nitrograph-cli'): Promise<ApiResult<DeviceStartResult>> {
+  return request<DeviceStartResult>('/v1/auth/device/start', {
+    method: 'POST',
+    body: JSON.stringify({ label }),
+  });
+}
+
+export interface DevicePollResult {
+  status?: string;
+  api_key?: string;
+  error?: string;
+}
+
+export function pollDevicePairing(deviceToken: string): Promise<ApiResult<DevicePollResult>> {
+  return request<DevicePollResult>('/v1/auth/device/poll', {
+    method: 'POST',
+    body: JSON.stringify({ device_token: deviceToken }),
+  });
+}
+
+/** Verify a caller-supplied key against GET /v1/session (does not use the stored/env key). */
+export function verifyApiKey(apiKey: string): Promise<ApiResult<Record<string, unknown>>> {
+  return request<Record<string, unknown>>('/v1/session', {
+    method: 'GET',
+    headers: { authorization: `Bearer ${apiKey}` },
+  });
+}
+
 export function categories(): Promise<ApiResult<Record<string, unknown>>> {
   return request<Record<string, unknown>>('/v1/categories', { method: 'GET' });
 }

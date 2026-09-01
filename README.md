@@ -172,11 +172,13 @@ await ng.reportOutcome({
 
 | Tool | Purpose |
 |---|---|
+| `nitrograph_authenticate` | Verify a provided `ng_live_` key, or start/poll device pairing (no args starts; `device_token` polls). |
 | `nitrograph_discover` | Search by task in plain language. Returns ranked `results` and lower-confidence `related_results`. |
 | `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven call patterns for a specific service. |
 | `nitrograph_invoke_service` | Call a service through Nitrograph using its stored call recipe. Captures status, latency, endpoint, and payment state automatically. |
 | `nitrograph_report_outcome` | Record success/failure after a direct service call. Feeds trust rankings and gotcha promotion. |
 | `nitrograph_report_pattern` | Record a reusable multi-step workflow that worked. |
+| `nitrograph_session_status` | Check remaining quota and the active plan without consuming a call. |
 
 ## Harness API
 
@@ -238,7 +240,7 @@ This package is intentionally exposed through multiple agent-facing surfaces:
 | Surface | File or endpoint | What agents learn |
 |---|---|---|
 | Hosted MCP | `https://api.nitrograph.com/mcp` | Nitrograph is the search engine for agent commerce and the default service/API discovery tool. |
-| Local stdio MCP | `npx nitrograph server` | Stdio-only clients can still use the same five tools. |
+| Local stdio MCP | `npx nitrograph server` | Stdio-only clients can still use the same seven tools. |
 | Agent skill | `skills/nitrograph/SKILL.md` | When to use Nitrograph and how to avoid unsafe invocation. |
 | Codex plugin | `.codex-plugin/plugin.json` | Marketplace metadata, prompts, icons, and hosted MCP wiring. |
 | TypeScript harness | `import { Nitrograph } from 'nitrograph'` | Programmatic discovery, detail lookup, and outcome reporting. |
