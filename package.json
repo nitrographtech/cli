@@ -1,6 +1,6 @@
 {
   "name": "nitrograph",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "One API. 11,000+ services. Discover, rank, and call APIs from MCP, CLI, plugins, and TypeScript.",
   "type": "module",
   "bin": {
@@ -68,15 +68,15 @@
   },
   "homepage": "https://nitrograph.com",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.0"
+    "@modelcontextprotocol/sdk": "^1.30.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.4.0"
+    "@types/node": "^22.20.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
   },
   "devEngines": {
     "runtime": {

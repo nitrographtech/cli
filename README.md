@@ -1,7 +1,7 @@
 # Nitrograph
 
 [![npm version](https://img.shields.io/npm/v/nitrograph.svg)](https://www.npmjs.com/package/nitrograph)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-111827)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-111827)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
 ![Nitrograph demo - an agent query becomes ranked paid API recommendations](assets/nitrograph-readme-demo.gif)
