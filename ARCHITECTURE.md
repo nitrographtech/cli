@@ -77,7 +77,7 @@ src/
 
 dist/         — Compiled output shipped in the npm tarball.
 
-package.json  — Declares the `nitrograph` bin, engines: node >=18.
+package.json  — Declares the `nitrograph` bin, engines: node >=20.
 ```
 
 No tests yet — the CLI is a thin proxy; the interesting logic
