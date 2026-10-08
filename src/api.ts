@@ -1,5 +1,6 @@
 import { loadConfig } from './config.js';
 import { pkgVersion } from './version.js';
+import { redactReport } from './report-privacy.js';
 
 
 // `nitrograph login` stores a paired key in the CLI config; env always wins.
@@ -199,7 +200,7 @@ export function reportOutcome(input: ReportOutcomeInput): Promise<ApiResult<Reco
   const { slug, ...body } = input;
   return request<Record<string, unknown>>(
     `/v1/service/${encodeURIComponent(slug)}/report-outcome`,
-    { method: 'POST', body: JSON.stringify(body) },
+    { method: 'POST', body: JSON.stringify(redactReport(body)) },
   );
 }
 
@@ -216,7 +217,7 @@ export function reportPattern(input: ReportPatternInput): Promise<ApiResult<Reco
   const { slug, ...body } = input;
   return request<Record<string, unknown>>(
     `/v1/service/${encodeURIComponent(slug)}/report-pattern`,
-    { method: 'POST', body: JSON.stringify(body) },
+    { method: 'POST', body: JSON.stringify(redactReport(body)) },
   );
 }
 

@@ -1,5 +1,11 @@
 # Nitrograph
 
+## Privacy and AI interfaces
+
+Nitrograph is an API tool, not a human chat representative. Hosts that expose a chatbot using Nitrograph must identify it as AI in its first message. A suitable opening is: “I’m an AI assistant using Nitrograph to help find and call APIs.” The MCP server supplies this instruction, but cannot control an independent host’s interface.
+
+Discovery text is sent to Nitrograph and its embedding provider. Hosted invocations forward the inputs and results needed to execute your requested API call; direct provider calls bypass Nitrograph. Optional operational reports are redacted on the device as a best-effort safeguard and are not automatically published. Never include secrets, personal/customer data, form or chat contents, payment details or health information in queries or reports. Reporting is optional; do not send customer workflow content without authorization. See the [privacy policy](https://nitrograph.com/privacy) and [third-party inventory](https://nitrograph.com/third-parties).
+
 [![npm version](https://img.shields.io/npm/v/nitrograph.svg)](https://www.npmjs.com/package/nitrograph)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-111827)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
@@ -176,7 +182,7 @@ await ng.reportOutcome({
 | `nitrograph_discover` | Search by task in plain language. Returns ranked `results` and lower-confidence `related_results`. |
 | `nitrograph_service_detail` | Fetch endpoints, schemas, costs, health, gotchas, and proven call patterns for a specific service. |
 | `nitrograph_invoke_service` | Call a service through Nitrograph using its stored call recipe. Captures status, latency, endpoint, and payment state automatically. |
-| `nitrograph_report_outcome` | Record success/failure after a direct service call. Feeds trust rankings and gotcha promotion. |
+| `nitrograph_report_outcome` | Optionally report generalized success/failure metadata after a direct call. Customer-authored text is private pending review. |
 | `nitrograph_report_pattern` | Record a reusable multi-step workflow that worked. |
 | `nitrograph_session_status` | Check remaining quota and the active plan without consuming a call. |
 

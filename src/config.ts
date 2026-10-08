@@ -1,6 +1,6 @@
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync, lstatSync } from 'node:fs';
 
 export interface NitrographConfig {
   api_url: string;
@@ -34,7 +34,13 @@ export function loadConfig(): NitrographConfig {
 
 export function saveConfig(cfg: NitrographConfig): void {
   const p = configPath();
-  mkdirSync(dirname(p), { recursive: true });
+  mkdirSync(dirname(p), { recursive: true, mode: 0o700 });
+  if (lstatSync(dirname(p)).isSymbolicLink() || (existsSync(p) && lstatSync(p).isSymbolicLink())) {
+    throw new Error('Refusing to store API credentials through a symbolic link');
+  }
+  chmodSync(dirname(p), 0o700);
+  // writeFile's mode applies only to new files; tighten existing files first.
+  if (existsSync(p)) chmodSync(p, 0o600);
   writeFileSync(p, JSON.stringify(cfg, null, 2) + '\n', { mode: 0o600 });
 }
 
