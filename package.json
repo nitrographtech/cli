@@ -1,6 +1,6 @@
 {
   "name": "nitrograph",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "One API. 11,000+ services. Discover, rank, and call APIs from MCP, CLI, plugins, and TypeScript.",
   "type": "module",
   "bin": {
