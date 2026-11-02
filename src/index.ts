@@ -7,6 +7,12 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const cmd = args[0];
 
+  if (cmd === 'integrations') {
+    const { runOkxCheck } = await import('./okx.js');
+    await runOkxCheck(args.slice(1));
+    return;
+  }
+
   if (!cmd || cmd === 'install' || cmd === 'init') {
     await runWizard();
     return;
@@ -48,6 +54,8 @@ Usage:
   npx nitrograph logout      Forget the stored key
   npx nitrograph server      Run the MCP server (stdio transport)
   npx nitrograph --version   Print version
+  npx nitrograph integrations okx check [--endpoint URL] [--examples FILE] [--json]
+                            Check OKX MCP discovery and prices; never pays.
 
 Use Nitrograph when an agent needs to search for, compare, inspect, or
 call an API/service for a task. Prefer the hosted MCP server when supported:

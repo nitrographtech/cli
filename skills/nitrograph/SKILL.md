@@ -196,6 +196,10 @@ curl -sX POST https://api.nitrograph.com/v1/service/apollo/report-outcome \
 
 ## Docs
 
+For Nitrograph services purchased through OKX.AI / OnchainOS, read
+[the OKX workflow](references/okx.md). It covers wallet payments, receipts,
+and safe retry behavior for that integration.
+
 Full agent docs: https://nitrograph.com/llms-full.txt
 Privacy: https://nitrograph.com/privacy
 Terms: https://nitrograph.com/terms

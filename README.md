@@ -248,6 +248,15 @@ This package is intentionally exposed through multiple agent-facing surfaces:
 
 ## Config
 
+### OKX integration checks
+
+`npx nitrograph integrations okx check --json` checks the dedicated OKX MCP
+endpoint's handshake, tool metadata, and x402 price challenges without signing
+or paying. Use `--endpoint URL` for a staging endpoint and `--examples FILE`
+for a JSON object mapping tool names to example arguments. A passing check
+does not certify a live payment or marketplace listing. See the
+[OnchainOS workflow](skills/nitrograph/references/okx.md).
+
 `~/.config/nitrograph/config.json`:
 
 ```json
