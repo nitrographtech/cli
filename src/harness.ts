@@ -6,6 +6,8 @@
  * discovery + reporting directly in code without going through an MCP host.
  */
 
+import { redactReport } from './report-privacy.js';
+
 const DEFAULT_API_URL = 'https://api.nitrograph.com';
 const DEFAULT_TIMEOUT_MS = 15_000;
 
@@ -224,7 +226,7 @@ export class Nitrograph {
     return this.request<unknown>(
       'POST',
       `/v1/service/${encodeURIComponent(slug)}/report-outcome`,
-      body,
+      redactReport(body),
     );
   }
 
@@ -238,7 +240,7 @@ export class Nitrograph {
     return this.request<unknown>(
       'POST',
       `/v1/service/${encodeURIComponent(slug)}/report-pattern`,
-      body,
+      redactReport(body),
     );
   }
 

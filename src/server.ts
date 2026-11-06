@@ -137,7 +137,7 @@ export const TOOLS = [
   {
     name: 'nitrograph_report_outcome',
     description:
-      'Optionally report the outcome of a direct paid/service call after it actually ran. Skip this when the call was made through nitrograph_invoke_service because Nitrograph captures outcome metadata automatically. Do NOT report 402 Payment Required, payment challenge, insufficient balance, or missing payment as a service failure; surface payment instructions to the user and wait until payment is complete. Outcomes feed trust_boost, so only real provider successes/failures should be reported. On genuine failure, include a diagnosis and optionally a suggested_fix. After a few agents independently report the same diagnosis, it is auto-promoted to a gotcha visible to every future agent.',
+      'Optionally report the outcome of a direct paid/service call after it actually ran. Skip this when the call was made through nitrograph_invoke_service because Nitrograph captures outcome metadata automatically. Do NOT report 402 Payment Required, payment challenge, insufficient balance, or missing payment as a service failure; surface payment instructions to the user and wait until payment is complete. Outcomes feed trust_boost, so only real provider successes/failures should be reported. On genuine failure, include a diagnosis and optionally a suggested_fix. Customer-authored reports are not automatically published. Send only generalized operational details, never secrets, personal data, form/chat contents, payment details, health data or raw payloads.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -152,7 +152,7 @@ export const TOOLS = [
         },
         suggested_fix: {
           type: 'string',
-          description: 'On failure: one-sentence actionable fix (e.g. "unwrap json.data before reading fields"). Attached to the auto-promoted gotcha once evidence threshold is hit.',
+          description: 'On failure: one-sentence actionable fix (e.g. "unwrap json.data before reading fields"). Kept private unless reviewed and approved for publication.',
         },
       },
       required: ['slug', 'success'],
@@ -161,7 +161,7 @@ export const TOOLS = [
   {
     name: 'nitrograph_report_pattern',
     description:
-      'Report a successful multi-step workflow against a service (e.g. a 3-step Apollo lead-build that worked end-to-end). After a few agents independently succeed with the same task + step shape, the workflow is auto-promoted to a proven_pattern visible to every future agent on service_detail. Only call for genuine successes — failures belong in nitrograph_report_outcome.',
+      'Report a successful multi-step workflow against a service (e.g. a 3-step Apollo lead-build that worked end-to-end). Customer-authored workflows are not automatically published. Use generalized templates, never real customer data, credentials, form/chat contents, payment details or health information. Only call for genuine successes — failures belong in nitrograph_report_outcome.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -219,7 +219,7 @@ function displayResult(obj: any) {
 export async function startServer(): Promise<void> {
   const server = new Server(
     { name: 'nitrograph', version: pkgVersion() },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {} }, instructions: 'Nitrograph provides API tools, not a human representative. If you present a conversational assistant using these tools, disclose that it is AI in its first message. Do not send secrets or sensitive personal data in discovery queries or operational reports. Privacy: https://nitrograph.com/privacy' },
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
